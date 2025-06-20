@@ -1,0 +1,9 @@
+---
+description: Specifications of the project as required by the client
+globs:
+alwaysApply: true
+---
+
+# General view of the project
+
+This is a plugin of WordpPress, which is meant to [...]

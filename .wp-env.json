@@ -1,0 +1,24 @@
+{
+  "core": null,
+  "plugins": [
+    ".",
+    "https://downloads.wordpress.org/plugin/plugin-check.zip"
+  ],
+  "phpVersion": "8.1",
+  "port": 1000,
+  "testsPort": 1001,
+  "config": {
+    "WP_DEBUG": true,
+    "WP_ENVIRONMENT_TYPE": "local"
+  },
+  "env": {
+		"development": {
+			"phpVersion": "8.1",
+			"port": 8666
+		},
+		"tests": {
+			"phpVersion": "8.1",
+			"port": 8667
+		}
+	}
+}
