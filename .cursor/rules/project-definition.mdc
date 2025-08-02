@@ -13,7 +13,20 @@ The result will be a json.
 
 # Conceptual sections of the plugin
 
-- section `models`, for the data structure in our WordPress DB. We will define the data models, in this case there is just a custom post type called `stock`. It just needs the title, no need to post_content, or show the author information or anything else beyong having `post_meta` associated. There will be a post meta for every options information associated to a date and a strike. For example, the post meta with meta_key `250801C00310000` with the `post_id` of the cpt 'stock' LMT, means that it stores info for the options of the date 1 Aug 2025, for the strike USD 310 for the stock LMT. The meta_value will look like this (we call this `stock post meta options json`)
+## Summary
+
+- section `models`
+- section `cboe connection`
+- section `sync cboe data with cpt`
+- section `garbage cleaner`
+- section `admin page`
+- section `cron job`
+- section `buffer update task`
+- section 'WordPress API'
+
+## Description
+
+- **section `models`**: for the data structure in our WordPress DB. We will define the data models, in this case there is just a custom post type called `stock`. It just needs the title, no need to post_content, or show the author information or anything else beyong having `post_meta` associated. There will be a post meta for every options information associated to a date and a strike. For example, the post meta with meta_key `250801C00310000` with the `post_id` of the cpt 'stock' LMT, means that it stores info for the options of the date 1 Aug 2025, for the strike USD 310 for the stock LMT. The meta_value will look like this (we call this `stock post meta options json`)
 meta_key `250801C00310000`
 ```
 	{
@@ -47,19 +60,19 @@ meta_key `250801C00310000`
 ```
 This section can abstract the CRUD for the CPT, and the CRUD for the post_meta as well.
 
-- section `cboe connection`. cboe is the external API provider that we connect to retrieve information about the options of a stock as a json. Example  `https://cdn.cboe.com/api/global/delayed_quotes/options/LMT.json`. The format of the json is in .cursor/rules/example-cboe-api.mdc. This section should ensure the connection to this API for a given stock symbol (ie LMT)
-- section `sync cboe data with cpt stock data`. This section is an extension of the `cboe connection`, and connection with the section 'models': Once we have retrieved the data for (i.e. LMT) in cboe, we need to parse the json to extract the data `stock post meta options json` for every date, and save it into the db.
-- section `garbage cleaner`. The function for this class will be to delete the old `post_meta` which is not relevant anymore (ie. options with date prvious of today or out of date - `cboe_timestamp` key is too old - )
-- section `admin page`. We will create a new menu section in the admin CMS for the handling of the options of this plugin. In this admin page there will be several sections
+- **section `cboe connection`**: cboe is the external API provider that we connect to retrieve information about the options of a stock as a json. Example  `https://cdn.cboe.com/api/global/delayed_quotes/options/LMT.json`. The format of the json is in .cursor/rules/example-cboe-api.mdc. This section should ensure the connection to this API for a given stock symbol (ie LMT)
+- **section `sync cboe data with cpt stock data`**: This section is an extension of the `cboe connection`, and connection with the section 'models': Once we have retrieved the data for (i.e. LMT) in cboe, we need to parse the json to extract the data `stock post meta options json` for every date, and save it into the db.
+- **section `garbage cleaner`**: The function for this class will be to delete the old `post_meta` which is not relevant anymore (ie. options with date prvious of today or out of date - `cboe_timestamp` key is too old - )
+- **section `admin page`**: We will create a new menu section in the admin CMS for the handling of the options of this plugin. In this admin page there will be several sections
 	- cron job: here we decide how ofter we want the cron job to trigger, including the option 'never'. It will trigger the cron job and show the information about the current situation of the last cron job launched, and how long will take for the next launch.
 	- buffer information. See below what the buffer is. It will show information of the current update process, information about the next one time off task to be triggered, and when last one time off task was triggered. Also, a button to force the triggering of the one time off cron job if it not running and there are elements in the buffer.
 	- stocks list: an input will allow to add a new CPT 'stock'. It will have to confirm that it exists in the `cboe` endpoint. Once the admin introduces a new stock, the admin page will reload. Below the input it will show the list of all the tickers that exist in WordPress as CPT, with a link to the edit the post.
 	- task buffer manager. The cron job triggers the 'buffer update task', which will be a buffer updating X stocks at each time (`processing batch of X stocks`). That X will be set up in the admin page.
-- section `cron job`. The cron job will be launched likely every 15 mins, which is the time that cboe updates its data too. When the cron jobs triggers the `buffer update task`, it will set a buffer queue with the ordered list of the stocks `post_name` that will be updated. We will have a differenc section (PHP class) to manage the buffer update.
+- **section `cron job`**: The cron job will be launched likely every 15 mins, which is the time that cboe updates its data too. When the cron jobs triggers the `buffer update task`, it will set a buffer queue with the ordered list of the stocks `post_name` that will be updated. We will have a differenc section (PHP class) to manage the buffer update.
 The name of the cron will have the prefix `cocostock_`.
 - section `buffer update task`. The task to update the list of CPT as stocks will be handled with a 'wp_schedule_single_event' cron job (one time off). The `buffer` is an option in the DB (called `cocostock_processing_buffer`) with a comma separated list of post_names of the CPT `stock`. Every time this mini cron job is triggered, it will update `processing batch of X stocks` (whose name will start by the prefix `cocostock_`). Every time one stock is updated, the buffer will delete the `post_name` of the processed stock from the list. Once the buffer finishes process the batch, it will trigger a WordPress action (so we can log it or send emails), and check if there are more stocks in the `cocostock_processing_buffer`. If it is empty, it will triger another WordPress action. If it is not empty, it will recursivelly call itself with 'wp_schedule_single_event'.
 This section will define a CRUD for the option `cocostock_processing_buffer`.
-- section 'WordPress API'. We will extend the WordPress API with an extra endpoint looking like this:
+- section 'WordPress API': We will extend the WordPress API with an extra endpoint looking like this:
 	- `wp-json/coco/puts/lmt?date=250801` will return the whole json given for the example `250801C00310000`
 	- `wp-json/coco/puts/lmt?date=250801&strike=310&field=bid` will return only 107.2, (it will have to translate 310 into `C00310000`). If needed, later we will create a way to calculate the ticks for every stock.
 

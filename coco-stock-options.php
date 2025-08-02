@@ -24,9 +24,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Define plugin constants
  */
-define( 'COCO_MP_VERSION', '1.0.0' );
-define( 'COCO_MP_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
-define( 'COCO_MP_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
+define( 'COCO_STOCK_OPTIONS_VERSION', '1.0.0' );
+define( 'COCO_STOCK_OPTIONS_FILE', __FILE__ );
+define( 'COCO_STOCK_OPTIONS_DIR', plugin_dir_path( __FILE__ ) );
+define( 'COCO_STOCK_OPTIONS_URL', plugin_dir_url( __FILE__ ) );
 
 /**
  * Initialize plugin
@@ -36,7 +37,21 @@ define( 'COCO_MP_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 function coco_mp_init(): void {
 
 	// includes
-	require_once COCO_MP_PLUGIN_DIR . 'inc/class-admin-enqueue.php';
+	require_once COCO_STOCK_OPTIONS_DIR . 'inc/admin/class-admin-enqueue.php';
+	require_once COCO_STOCK_OPTIONS_DIR . 'inc/admin/class-admin-page.php';
+	require_once COCO_STOCK_OPTIONS_DIR . 'inc/admin/class-admin-ui.php';
+	require_once COCO_STOCK_OPTIONS_DIR . 'inc/api/class-wordpress-api.php';
+	require_once COCO_STOCK_OPTIONS_DIR . 'inc/cboe/class-cboe-connection.php';
+	require_once COCO_STOCK_OPTIONS_DIR . 'inc/cboe/class-sync-cboe-data.php';
+	require_once COCO_STOCK_OPTIONS_DIR . 'inc/cron/class-buffer-manager.php';
+	require_once COCO_STOCK_OPTIONS_DIR . 'inc/cron/class-cron-job.php';
+	require_once COCO_STOCK_OPTIONS_DIR . 'inc/cron/class-garbage-cleaner.php';
+	require_once COCO_STOCK_OPTIONS_DIR . 'inc/models/class-stock-cpt.php';
+	require_once COCO_STOCK_OPTIONS_DIR . 'inc/models/class-stock-meta.php';
+	require_once COCO_STOCK_OPTIONS_DIR . 'inc/class-coco-stock-options.php';
+
+	// Initialize the main plugin
+	\CocoStockOptions\CocoStockOptions::get_instance();
 }
 
 // Initialize the plugin
@@ -60,9 +75,9 @@ function dd( mixed $var ): void {
  * Debug function to dump variables and die
  *
  * @param mixed $var Variable to dump
- * @return never
+ * @return void
  */
-function ddie( mixed $var = '' ): never {
+function ddie( mixed $var = '' ): void {
 	dd( $var );
 	wp_die();
 }

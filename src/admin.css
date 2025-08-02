@@ -1,0 +1,189 @@
+/**
+ * Admin CSS for Coco Stock Options
+ */
+
+.cocostock-admin-container {
+	max-width: 1200px;
+	margin: 20px 0;
+}
+
+.cocostock-section {
+	background: #fff;
+	border: 1px solid #ccd0d4;
+	border-radius: 4px;
+	padding: 20px;
+	margin-bottom: 20px;
+	box-shadow: 0 1px 1px rgba(0,0,0,.04);
+}
+
+.cocostock-section h2 {
+	margin-top: 0;
+	color: #23282d;
+	border-bottom: 1px solid #eee;
+	padding-bottom: 10px;
+}
+
+.cocostock-section h3 {
+	margin-top: 20px;
+	color: #23282d;
+}
+
+.cocostock-cron-info,
+.cocostock-buffer-info {
+	background: #f9f9f9;
+	border: 1px solid #e5e5e5;
+	border-radius: 3px;
+	padding: 15px;
+	margin-top: 15px;
+}
+
+.cocostock-cron-info p,
+.cocostock-buffer-info p {
+	margin: 5px 0;
+}
+
+.cocostock-add-stock {
+	background: #f9f9f9;
+	border: 1px solid #e5e5e5;
+	border-radius: 3px;
+	padding: 15px;
+	margin-bottom: 20px;
+}
+
+.cocostock-add-stock input[type="text"] {
+	width: 200px;
+	margin-right: 10px;
+}
+
+.cocostock-stocks-list table {
+	margin-top: 15px;
+}
+
+.cocostock-stocks-list th {
+	font-weight: 600;
+}
+
+#add-stock-result {
+	margin-top: 10px;
+}
+
+#add-stock-result .notice {
+	margin: 10px 0;
+}
+
+.cocostock-status-indicator {
+	display: inline-block;
+	width: 10px;
+	height: 10px;
+	border-radius: 50%;
+	margin-right: 5px;
+}
+
+.cocostock-status-success {
+	background-color: #46b450;
+}
+
+.cocostock-status-error {
+	background-color: #dc3232;
+}
+
+.cocostock-status-warning {
+	background-color: #ffb900;
+}
+
+.cocostock-status-info {
+	background-color: #00a0d2;
+}
+
+.cocostock-stats-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+	gap: 15px;
+	margin-top: 15px;
+}
+
+.cocostock-stat-box {
+	background: #f9f9f9;
+	border: 1px solid #e5e5e5;
+	border-radius: 3px;
+	padding: 15px;
+	text-align: center;
+}
+
+.cocostock-stat-number {
+	font-size: 24px;
+	font-weight: bold;
+	color: #23282d;
+}
+
+.cocostock-stat-label {
+	font-size: 12px;
+	color: #666;
+	text-transform: uppercase;
+	margin-top: 5px;
+}
+
+.cocostock-button-group {
+	margin-top: 15px;
+}
+
+.cocostock-button-group .button {
+	margin-right: 10px;
+}
+
+.cocostock-loading {
+	opacity: 0.5;
+	pointer-events: none;
+}
+
+.cocostock-loading::after {
+	content: '';
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	width: 20px;
+	height: 20px;
+	border: 2px solid #f3f3f3;
+	border-top: 2px solid #3498db;
+	border-radius: 50%;
+	animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+	0% { transform: translate(-50%, -50%) rotate(0deg); }
+	100% { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+/* Stock Options Meta Box */
+.stock-options-info {
+	padding: 10px 0;
+}
+
+.stock-options-info p {
+	margin: 8px 0;
+}
+
+.stock-options-info strong {
+	color: #23282d;
+}
+
+.stock-options-info em {
+	color: #666;
+	font-style: italic;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+	.cocostock-section {
+		padding: 15px;
+	}
+
+	.cocostock-add-stock input[type="text"] {
+		width: 100%;
+		margin-bottom: 10px;
+	}
+
+	.cocostock-stats-grid {
+		grid-template-columns: 1fr;
+	}
+} 
