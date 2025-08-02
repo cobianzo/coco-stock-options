@@ -33,7 +33,7 @@ class AdminEnqueue {
 			wp_enqueue_script(
 				'coco-stock-options-admin',
 				COCO_STOCK_OPTIONS_URL . 'build/index.js',
-				[ 'jquery' ],
+				[],
 				COCO_STOCK_OPTIONS_VERSION,
 				true
 			);

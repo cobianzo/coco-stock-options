@@ -260,6 +260,7 @@ class AdminPage {
 								<?php esc_html_e( 'Force Process Buffer', 'coco-stock-options' ); ?>
 							</button>
 						<?php endif; ?>
+						<div id="buffer-result"></div>
 					</div>
 				</div>
 
