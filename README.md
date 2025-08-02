@@ -5,7 +5,7 @@ TODO
 WHAT IS THIS PROJECT
 ===
 
-[...]
+This plugin defines Custom Post Types (CPT) for tracking required stocks. It scans for future options values for each stock from the CBOE API (`https://cdn.cboe.com/api/global/delayed_quotes/options/<stock-symbol>.json`) via a cron job. The results are formatted and saved as post meta, then exposed through a custom REST API endpoint, for example: `wp-json/coco/puts/lmt?date=250815&strike=350`.
 
 HOW IT WORKS
 ===
@@ -110,7 +110,7 @@ If run teh tests outside the container, it's still not tested.
 
 packages:
 - `phpunit/phpunit`: ! important, version 9 max, or it will be incompatible with function inside teh tests.
-Then we can access locally o inside the container to wp-content/plugins/coco-miplugin/vendor/bin/phpunit
+Then we can access locally o inside the container to wp-content/plugins/coco-stock-options/vendor/bin/phpunit
 - `yoast/phpunit-polyfills` it must be installed, and `wp-env run tests-wordpress` finds it automatically. When installed, it install phpunit, as it depends on it, but the version 12. We need to install phpunit ourselves, the version 9, so there are no incompatibilites.
 - `spatie/phpunit-watcher`: for the phpUnit watcher, ran with `npm run test:php:watch`.
 - ~~wp-phpunit/wp-phpunit~~: not needed, all the bootstrap is handled by `wp-env run tests-wordpress`
@@ -127,10 +127,10 @@ To create the .pot with all tranlatable strings, get into the container with
 `npm run cli bash`
 and
 ```
-cd wp-content/plugins/coco-miplugin
-wp i18n make-pot . languages/coco-miplugin.pot --domain=coco-miplugin
+cd wp-content/plugins/coco-stock-options
+wp i18n make-pot . languages/coco-stock-options.pot --domain=coco-stock-options
 ```
-To make the translations you can use Poedit, opening `coco-miplugin-es_ES.po`, and update the catalogue from the .pot ( Translation > Update from POT File ).
+To make the translations you can use Poedit, opening `coco-stock-options-es_ES.po`, and update the catalogue from the .pot ( Translation > Update from POT File ).
 Then translate what you want. To make the translations you can use Poedit, but I like to open the .po with VSCode, and translate the strings with IA, under the promt 'for every empty msgstr, set the translation from msgid into italian.'.
 Then, to create the .mo files, we need to run
 ```

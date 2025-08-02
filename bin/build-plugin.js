@@ -43,7 +43,7 @@ class PluginBuilder {
      */
     constructor(version = null) {
         // Configuración básica del plugin
-        this.pluginSlug = 'coco-miplugin';
+        this.pluginSlug = 'coco-stock-options';
         this.version = version;
         this.distDir = 'dist';
 
@@ -219,7 +219,7 @@ async function main() {
     // Obtener la versión del argumento de línea de comandos (not used anymore, I prefer to extract it.)
     //  const version = process.argv[2] && !process.argv[2].startsWith('--') ? process.argv[2] : null;
 
-    const version = extractVersion(path.join(__dirname, '../', 'coco-miplugin.php'));
+    const version = extractVersion(path.join(__dirname, '../', 'coco-stock-options.php'));
 
     const skipCompression = [process.argv[2], process.argv[3]].includes('--skip-compression');
 

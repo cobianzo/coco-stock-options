@@ -13,26 +13,26 @@ msgstr ""
 "X-Generator: Poedit 3.6\n"
 
 #. Plugin Name of the plugin
-#: coco-miplugin.php
-msgid "Coco Mi Plugin"
+#: coco-stock-options.php
+msgid "Coco Stock Options API plugin"
 msgstr "Transición Visual Coco"
 
 #. Plugin URI of the plugin
-#: coco-miplugin.php
-msgid "https://cobianzo.com/plugins/coco-miplugin/"
-msgstr "https://cobianzo.com/plugins/coco-miplugin/"
+#: coco-stock-options.php
+msgid "https://cobianzo.com/plugins/coco-stock-options/"
+msgstr "https://cobianzo.com/plugins/coco-stock-options/"
 
 #. Description of the plugin
-#: coco-miplugin.php
+#: coco-stock-options.php
 msgid "A boilerplate for a new plugin"
 msgstr "Un plugin para transiciones visuales"
 
 #. Author of the plugin
-#: coco-miplugin.php
+#: coco-stock-options.php
 msgid "cobianzo"
 msgstr "cobianzo"
 
 #. Author URI of the plugin
-#: coco-miplugin.php
+#: coco-stock-options.php
 msgid "https://cobianzo.com"
 msgstr "https://cobianzo.com"

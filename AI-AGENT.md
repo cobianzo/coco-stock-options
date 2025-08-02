@@ -30,7 +30,7 @@ Other keywords:
 
 - The main folder structure :
 ```
-coco-miplugin.php
+coco-stock-options.php
 inc/ my php files.
 src/ my ts files which compile into /build/
 ```

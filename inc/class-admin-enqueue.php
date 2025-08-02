@@ -34,7 +34,7 @@ class Admin_Enqueue {
 		 */
 		$asset_file = include plugin_dir_path( __DIR__ ) . 'build/index.asset.php';
 
-		$script_handle = 'coco-miplugin';
+		$script_handle = 'coco-stock-options';
 
 		// Register the script before enqueueing.
 		wp_register_script(
@@ -59,7 +59,7 @@ class Admin_Enqueue {
 		$languages_dir = plugin_dir_path( __DIR__ ) . 'languages';
 		wp_set_script_translations(
 			$script_handle,
-			'coco-miplugin',
+			'coco-stock-options',
 			$languages_dir
 		);
 

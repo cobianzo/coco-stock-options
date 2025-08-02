@@ -19,7 +19,7 @@ const __dirname = path.dirname(__filename);
 
 // Paths to your files
 const FILES = {
-	pluginPHP: path.join(__dirname, '../', 'coco-miplugin.php'),
+	pluginPHP: path.join(__dirname, '../', 'coco-stock-options.php'),
 	packageJSON: path.join(__dirname, '../', 'package.json'),
 	composerJSON: path.join(__dirname, '../', 'composer.json'),
 	readmeTXT: path.join(__dirname, '../', 'README-plugin.txt'),
