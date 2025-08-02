@@ -12,6 +12,7 @@ use CocoStockOptions\Models\Stock_CPT;
 use CocoStockOptions\Models\Stock_Meta;
 use CocoStockOptions\Cboe\CboeConnection;
 use CocoStockOptions\Cron\BufferManager;
+use CocoStockOptions\Cron\CronJob;
 
 /**
  * Admin Page class for managing plugin settings
@@ -47,18 +48,27 @@ class AdminPage {
 	private BufferManager $buffer_manager;
 
 	/**
+	 * Cron Job instance
+	 *
+	 * @var CronJob
+	 */
+	private CronJob $cron_job;
+
+	/**
 	 * Initialize the admin page
 	 *
 	 * @param Stock_CPT      $stock_cpt       Stock CPT instance.
 	 * @param Stock_Meta     $stock_meta      Stock Meta instance.
 	 * @param CboeConnection $cboe_connection CBOE Connection instance.
 	 * @param BufferManager  $buffer_manager  Buffer Manager instance.
+	 * @param CronJob        $cron_job        Cron Job instance.
 	 */
-	public function __construct( Stock_CPT $stock_cpt, Stock_Meta $stock_meta, CboeConnection $cboe_connection, BufferManager $buffer_manager ) {
+	public function __construct( Stock_CPT $stock_cpt, Stock_Meta $stock_meta, CboeConnection $cboe_connection, BufferManager $buffer_manager, CronJob $cron_job ) {
 		$this->stock_cpt       = $stock_cpt;
 		$this->stock_meta      = $stock_meta;
 		$this->cboe_connection = $cboe_connection;
 		$this->buffer_manager  = $buffer_manager;
+		$this->cron_job        = $cron_job;
 		$this->init_hooks();
 	}
 
@@ -101,6 +111,18 @@ public function handle_form_submissions(): void {
 			return;
 		}
 
+		// Handle trigger cron action
+		if ( isset( $_POST['cocostock_action'] ) && 'trigger_cron' === $_POST['cocostock_action'] ) {
+			$this->handle_trigger_cron();
+			return;
+		}
+
+		// Handle cancel next cron action
+		if ( isset( $_POST['cocostock_action'] ) && 'cancel_next_cron' === $_POST['cocostock_action'] ) {
+			$this->handle_cancel_next_cron();
+			return;
+		}
+
 		// Handle other form submissions
 		if ( ! isset( $_POST['cocostock_nonce'] ) || ! wp_verify_nonce( $_POST['cocostock_nonce'], 'cocostock_admin_action' ) ) {
 			return;
@@ -114,6 +136,44 @@ public function handle_form_submissions(): void {
 			$this->handle_batch_size_update();
 		}
 	}
+
+	/**
+	 * Handle trigger cron manually
+	 */
+	private function handle_trigger_cron(): void {
+		// Trigger the cron job directly
+		$this->cron_job->update_buffer();
+
+		add_action( 'admin_notices', function () {
+			echo '<div class="notice notice-success"><p>' . esc_html__( 'Cron job triggered manually.', 'coco-stock-options' ) . '</p></div>';
+		} );
+	}
+
+	/**
+	 * Handle canceling the next scheduled cron job
+	 */
+	private function handle_cancel_next_cron(): void {
+		$next_scheduled = wp_next_scheduled( 'cocostock_update_buffer' );
+
+		if ( $next_scheduled ) {
+			wp_clear_scheduled_hook( 'cocostock_update_buffer' );
+			add_action( 'admin_notices', function () {
+				echo '<div class="notice notice-success"><p>' . esc_html__( 'Next cron job cancelled successfully.', 'coco-stock-options' ) . '</p></div>';
+			} );
+		} else {
+			add_action( 'admin_notices', function () {
+				echo '<div class="notice notice-info"><p>' . esc_html__( 'No cron job scheduled to cancel.', 'coco-stock-options' ) . '</p></div>';
+			} );
+		}
+	}
+
+	/**
+	 * Handle cron schedule update
+	 */
+
+	/**
+	 * Handle cron schedule update
+	 */
 
 	/**
 	 * Handle cron schedule update
@@ -363,6 +423,12 @@ public function render_admin_page(): void {
 							</tr>
 						</table>
 						<?php submit_button( __( 'Update Schedule', 'coco-stock-options' ) ); ?>
+						<button type="submit" name="cocostock_action" value="trigger_cron" class="button button-secondary">
+							<?php esc_html_e( 'Trigger Cron Manually', 'coco-stock-options' ); ?>
+						</button>
+						<button type="submit" name="cocostock_action" value="cancel_next_cron" class="button button-secondary">
+							<?php esc_html_e( 'Cancel Next Cron', 'coco-stock-options' ); ?>
+						</button>
 					</form>
 
 					<div class="cocostock-cron-info">
@@ -425,6 +491,18 @@ public function render_admin_page(): void {
 												?>
 												<a href="<?php echo esc_url( $cboe_url ); ?>" class="button button-small" target="_blank" rel="noopener noreferrer">
 													<?php esc_html_e( 'CBOE API', 'coco-stock-options' ); ?>
+												</a>
+												<?php
+												// Add REST API endpoint links for puts and calls
+												$site_url = get_site_url();
+												$puts_endpoint = $site_url . '/wp-json/coco/v1/puts/' . urlencode( $symbol );
+												$calls_endpoint = $site_url . '/wp-json/coco/v1/calls/' . urlencode( $symbol );
+												?>
+												<a href="<?php echo esc_url( $puts_endpoint ); ?>" class="button button-small" target="_blank" rel="noopener noreferrer">
+													<?php esc_html_e( 'Puts API', 'coco-stock-options' ); ?>
+												</a>
+												<a href="<?php echo esc_url( $calls_endpoint ); ?>" class="button button-small" target="_blank" rel="noopener noreferrer">
+													<?php esc_html_e( 'Calls API', 'coco-stock-options' ); ?>
 												</a>
 											</td>
 										</tr>

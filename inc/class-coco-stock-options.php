@@ -146,7 +146,7 @@ class CocoStockOptions {
 		$this->garbage_cleaner = new GarbageCleaner( $this->stock_cpt, $this->stock_meta );
 		$this->buffer_manager  = new BufferManager( $this->stock_cpt, $this->stock_meta, $this->sync_data );
 		$this->cron_job        = new CronJob( $this->buffer_manager );
-		$this->admin_page      = new AdminPage( $this->stock_cpt, $this->stock_meta, $this->cboe_connection, $this->buffer_manager );
+		$this->admin_page      = new AdminPage( $this->stock_cpt, $this->stock_meta, $this->cboe_connection, $this->buffer_manager, $this->cron_job );
 		$this->admin_ui        = new Admin_UI();
 		$this->stock_ui        = new Stock_UI();
 		$this->wordpress_api   = new WordPressApi( $this->stock_cpt, $this->stock_meta );
