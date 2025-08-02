@@ -48,6 +48,7 @@ function coco_mp_init(): void {
 	require_once COCO_STOCK_OPTIONS_DIR . 'inc/cron/class-garbage-cleaner.php';
 	require_once COCO_STOCK_OPTIONS_DIR . 'inc/models/class-stock-cpt.php';
 	require_once COCO_STOCK_OPTIONS_DIR . 'inc/models/class-stock-meta.php';
+	require_once COCO_STOCK_OPTIONS_DIR . 'inc/models/class-stock-ui.php';
 	require_once COCO_STOCK_OPTIONS_DIR . 'inc/class-coco-stock-options.php';
 
 	// Initialize the main plugin

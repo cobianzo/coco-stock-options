@@ -244,7 +244,7 @@ class BufferManager {
 	 *
 	 * @return array Array of stock symbols in buffer.
 	 */
-	private function get_buffer(): array {
+	public function get_buffer(): array {
 		$buffer = get_option( self::BUFFER_OPTION, '' );
 
 		if ( empty( $buffer ) ) {

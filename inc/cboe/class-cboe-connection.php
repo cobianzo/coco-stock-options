@@ -96,21 +96,7 @@ class CboeConnection {
 	 * @return string|null Timestamp string or null if not found.
 	 */
 	public function get_cboe_timestamp( array $cboe_data ): ?string {
-		if ( ! is_array( $cboe_data ) || ! isset( $cboe_data['data'] ) ) {
-			return null;
-		}
-
-		// Look for timestamp in the response structure
-		// This might need adjustment based on actual CBOE API response format
-		if ( isset( $cboe_data['timestamp'] ) ) {
-			return $cboe_data['timestamp'];
-		}
-
-		if ( isset( $cboe_data['data']['timestamp'] ) ) {
-			return $cboe_data['data']['timestamp'];
-		}
-
-		return null;
+		return isset( $cboe_data['timestamp'] ) ? $cboe_data['timestamp'] : null;
 	}
 
 	/**
@@ -120,12 +106,7 @@ class CboeConnection {
 	 * @return bool True if valid, false otherwise.
 	 */
 	public function validate_cboe_response( array $cboe_data ): bool {
-		if ( ! is_array( $cboe_data ) ) {
-			return false;
-		}
-
-		// Basic validation - adjust based on actual CBOE API structure
-		return isset( $cboe_data['data'] ) && is_array( $cboe_data['data'] );
+		return is_array( $cboe_data ) && isset( $cboe_data['data'] ) && is_array( $cboe_data['data'] );
 	}
 
 	/**

@@ -51,10 +51,23 @@ class SyncCboeData {
 	}
 
 	/**
-	 * Sync options data for a specific stock symbol
+	 * Synchronize and update options data for a given stock symbol.
 	 *
-	 * @param string $symbol Stock symbol.
-	 * @return array Sync results.
+	 * This function retrieves the latest options data for the specified stock symbol
+	 * from the CBOE API, validates the response, and parses the options chain. It then
+	 * saves each relevant option's data as post meta associated with the stock's custom post type
+	 * in the WordPress database. The function returns a summary of the sync operation,
+	 * including the number of options processed, any errors encountered, and a status message.
+	 *
+	 * @param string $symbol Stock symbol (e.g., 'LMT').
+	 * @return array {
+	 *     @type string   $symbol    The stock symbol processed.
+	 *     @type bool     $success   Whether the sync was successful.
+	 *     @type string   $message   Human-readable status message.
+	 *     @type int      $processed Number of options processed and saved.
+	 *     @type array    $errors    List of errors encountered during sync.
+	 *     @type string   $timestamp Timestamp of the sync operation.
+	 * }
 	 */
 	public function sync_stock_options( string $symbol ): array {
 		$results = [
@@ -106,10 +119,11 @@ class SyncCboeData {
 	 * Parse CBOE data and save to database
 	 *
 	 * @param int   $post_id Stock post ID.
-	 * @param array $cboe_data CBOE API response data.
+	 * @param array $cboe_data CBOE API response data. See assets/pretty-cboe-response-lmt.json
 	 * @return array Parse results.
 	 */
 	private function parse_and_save_options( int $post_id, array $cboe_data ): array {
+
 		$results = [
 			'success'   => false,
 			'processed' => 0,
@@ -131,19 +145,25 @@ class SyncCboeData {
 
 		foreach ( $cboe_data['data']['options'] as $option ) {
 			try {
-				$parsed_option = $this->parse_single_option( $option, $cboe_timestamp, $current_time );
+
+				$parsed_option = $this->parse_single_option_data( $option, $cboe_timestamp );
 
 				if ( $parsed_option ) {
-					$meta_key = $this->generate_meta_key( $option );
+					$meta_key = $this->generate_meta_key_from_parsed_data( $parsed_option ); // see assets/pretty-cboe-response-lmt.json for the option structure.
 
 					if ( $meta_key ) {
-						$saved = $this->stock_meta->save_stock_options( $post_id, $meta_key, $parsed_option );
+						$existing_options = $this->stock_meta->add_or_update_strike(
+							$post_id,
+							$parsed_option['stock_symbol'],
+							$parsed_option['date'],
+							$parsed_option['option_type'],
+							$parsed_option['strike_price'],
+							$parsed_option['value']
+						);
 
-						if ( $saved ) {
-							$processed++;
-						} else {
-							$errors[] = sprintf( 'Failed to save option %s', $meta_key );
-						}
+
+						$processed++;
+
 					} else {
 						$errors[] = sprintf( 'Failed to generate meta key for option', $option );
 					}
@@ -163,77 +183,72 @@ class SyncCboeData {
 	}
 
 	/**
-	 * Parse a single option from CBOE data
+	 * Parse the ticker+date+option type+strike from a single option from CBOE data.
+	 * Refer to assets/pretty-cboe-response-lmt.json to know how an option looks like,
+	 * (see the first item in the data.options array).
 	 *
 	 * @param array  $option CBOE option data.
-	 * @param string $cboe_timestamp CBOE timestamp.
-	 * @param string $current_time Current timestamp.
+	 * @param string $cboe_timestamp the time "2025-07-01 20:16:40"
 	 * @return array|false Parsed option data or false on failure.
 	 */
-	private function parse_single_option( array $option, ?string $cboe_timestamp, string $current_time ): array|false {
-		// This parsing logic will need to be adjusted based on actual CBOE API structure
-		$parsed = [
-			'last_update'      => $current_time,
-			'cboe_timestamp'   => $cboe_timestamp,
-			'date'             => isset( $option['expiration'] ) ? $option['expiration'] : '',
-			'option'           => isset( $option['symbol'] ) ? $option['symbol'] : '',
-			'bid'              => isset( $option['bid'] ) ? (float) $option['bid'] : 0,
-			'bid_size'         => isset( $option['bidSize'] ) ? (int) $option['bidSize'] : 0,
-			'ask'              => isset( $option['ask'] ) ? (float) $option['ask'] : 0,
-			'ask_size'         => isset( $option['askSize'] ) ? (int) $option['askSize'] : 0,
-			'iv'               => isset( $option['iv'] ) ? (float) $option['iv'] : 0,
-			'open_interest'    => isset( $option['openInterest'] ) ? (int) $option['openInterest'] : 0,
-			'volume'           => isset( $option['volume'] ) ? (int) $option['volume'] : 0,
-			'delta'            => isset( $option['delta'] ) ? (float) $option['delta'] : 0,
-			'gamma'            => isset( $option['gamma'] ) ? (float) $option['gamma'] : 0,
-			'vega'             => isset( $option['vega'] ) ? (float) $option['vega'] : 0,
-			'theta'            => isset( $option['theta'] ) ? (float) $option['theta'] : 0,
-			'rho'              => isset( $option['rho'] ) ? (float) $option['rho'] : 0,
-			'theo'             => isset( $option['theo'] ) ? (float) $option['theo'] : 0,
-			'change'           => isset( $option['change'] ) ? (float) $option['change'] : 0,
-			'open'             => isset( $option['open'] ) ? (float) $option['open'] : 0,
-			'high'             => isset( $option['high'] ) ? (float) $option['high'] : 0,
-			'low'              => isset( $option['low'] ) ? (float) $option['low'] : 0,
-			'tick'             => isset( $option['tick'] ) ? $option['tick'] : 'no_change',
-			'last_trade_price' => isset( $option['lastTradePrice'] ) ? (float) $option['lastTradePrice'] : 0,
-			'last_trade_time'  => isset( $option['lastTradeTime'] ) ? $option['lastTradeTime'] : null,
-			'percent_change'   => isset( $option['percentChange'] ) ? (float) $option['percentChange'] : 0,
-			'prev_day_close'   => isset( $option['prevDayClose'] ) ? (float) $option['prevDayClose'] : 0,
-		];
+	private function parse_single_option_data( array $option, string $cboe_timestamp ): array|false {
 
 		// Validate required fields
-		if ( empty( $parsed['date'] ) || empty( $parsed['option'] ) ) {
+		if ( ! isset( $option['option'] ) ) {
 			return false;
 		}
 
+		$option_cboe_code = $option['option']; // ie: BXMT250815C00011000
+
+		// Extract components from CBOE code using regex
+		if ( ! preg_match( '/^([A-Z]+)(\d{6})([CP])(\d+)$/', $option_cboe_code, $matches ) ) {
+				return false;
+		}
+
+
+		$option = array_merge( [
+			'cboe_timestamp' => $cboe_timestamp,
+			'last_update'    => current_time('mysql'),
+		], $option );
+
+		$parsed = [
+			'stock_symbol' => $matches[1], // BXMT
+			'date'         => $matches[2], // 250815
+			'option_type'  => $matches[3], // C
+			'strike_price' => $matches[4], // 00011000
+			'value'        => $option,
+		];
 		return $parsed;
 	}
 
 	/**
-	 * Generate meta key for option data
+	 * Generate meta key for option data in the format YYMMDDX00000000
+	 * where:
+	 * - YYMMDD is the expiration date (e.g. 240315 for March 15, 2024)
+	 * - X is C for call options or P for put options
+	 * - 00000000 is the strike price multiplied by 100 with leading zeros (e.g. 00310000 for $310.00)
 	 *
-	 * @param array $option CBOE option data.
+	 * @param array $parsed_option associative array
 	 * @return string|false Meta key or false on failure.
 	 */
-	private function generate_meta_key( array $option ): string|false {
-		if ( ! isset( $option['expiration'] ) || ! isset( $option['strike'] ) || ! isset( $option['type'] ) ) {
+	private function generate_meta_key_from_parsed_data( array $parsed_option ): string|false {
+
+		if ( ! $parsed_option ) {
 			return false;
 		}
+		//  [
+		// 	'stock_symbol' => 'BXMT'
+		// 	'date'         => '250815'
+		// 	'option_type'  => 'C'
+		// 	'strike_price' => '00011000'
+		// ];
+		$meta_key = sprintf( '%s%s%s',
+			$parsed_option['stock_symbol'],
+			$parsed_option['date'],
+			$parsed_option['option_type']
+		);
 
-		// Convert date format (assuming YYYY-MM-DD to YYMMDD)
-		$date = $option['expiration'];
-		if ( preg_match( '/^(\d{4})-(\d{2})-(\d{2})$/', $date, $matches ) ) {
-			$date = $matches[1][2] . $matches[1][3] . $matches[2] . $matches[3];
-		}
-
-		// Convert strike price to format (e.g., 310.00 -> 00310000)
-		$strike           = (float) $option['strike'];
-		$strike_formatted = sprintf( '%08d', (int) ( $strike * 100 ) );
-
-		// Option type (C for call, P for put)
-		$type = strtoupper( $option['type'] ) === 'CALL' ? 'C' : 'P';
-
-		return $date . $type . $strike_formatted;
+		return $meta_key;
 	}
 
 	/**

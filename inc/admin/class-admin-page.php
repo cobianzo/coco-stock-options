@@ -133,9 +133,10 @@ private function handle_cron_schedule_update(): void {
 		} );
 	}
 
-		/**
-	 * Handle force buffer processing
-	 */
+/**
+ * Handle force buffer processing.
+ * Wrapper for force _ process _ buffer, when clicked in the button
+ */
 private function handle_force_buffer(): void {
 		if ( ! isset( $_POST['cocostock_force_buffer_nonce'] ) || ! wp_verify_nonce( $_POST['cocostock_force_buffer_nonce'], 'cocostock_force_buffer' ) ) {
 			add_action( 'admin_notices', function () {
@@ -277,7 +278,16 @@ private function render_buffer_info_html(): string {
 
 		ob_start();
 		?>
-		<p><strong><?php esc_html_e( 'Stocks in Buffer:', 'coco-stock-options' ); ?></strong> <?php echo esc_html( $buffer_info['count'] ); ?></p>
+		<p>
+			<strong><?php esc_html_e( 'Stocks in Buffer:', 'coco-stock-options' ); ?></strong>
+			<?php echo esc_html( $buffer_info['count'] ); ?>
+				<br>
+				<span>
+					<?php
+					echo esc_html( implode( ', ', $this->buffer_manager->get_buffer() ) );
+					?>
+				</span>
+		</p>
 		<p><strong><?php esc_html_e( 'Last Processing:', 'coco-stock-options' ); ?></strong> <?php echo esc_html( $buffer_info['last_processed'] ); ?></p>
 		<p><strong><?php esc_html_e( 'Next Processing:', 'coco-stock-options' ); ?></strong> <?php echo esc_html( $buffer_info['next_processing'] ); ?></p>
 
