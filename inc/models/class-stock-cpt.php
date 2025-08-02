@@ -28,14 +28,14 @@ class Stock_CPT {
 	/**
 	 * Initialize WordPress hooks
 	 */
-	private function init_hooks() {
+	private function init_hooks(): void {
 		add_action( 'init', [ $this, 'register_stock_post_type' ] );
 	}
 
 	/**
 	 * Register the stock custom post type
 	 */
-	public function register_stock_post_type() {
+	public function register_stock_post_type(): void {
 		$labels = [
 			'name'               => __( 'Stocks', 'coco-stock-options' ),
 			'singular_name'      => __( 'Stock', 'coco-stock-options' ),
@@ -73,7 +73,7 @@ class Stock_CPT {
 	 * @param string $symbol Stock symbol (e.g., 'LMT').
 	 * @return int|WP_Error Post ID on success, WP_Error on failure.
 	 */
-	public function create_stock( $symbol ) {
+	public function create_stock( string $symbol ): int|\WP_Error {
 		$post_data = [
 			'post_title'  => $symbol,
 			'post_name'   => strtolower( $symbol ),
@@ -90,13 +90,14 @@ class Stock_CPT {
 	 * @param string $symbol Stock symbol.
 	 * @return WP_Post|null Post object or null if not found.
 	 */
-	public function get_stock_by_symbol( $symbol ) {
+	public function get_stock_by_symbol( string $symbol ): ?\WP_Post {
 		$posts = get_posts( [
 			'post_type'      => self::POST_TYPE,
-			'post_name'      => strtolower( $symbol ),
+			'name'           => strtolower( $symbol ),
 			'posts_per_page' => 1,
 			'post_status'    => 'publish',
 		] );
+		error_log( '✅ checkpoint TODELETE ' . print_r( $posts, 1 ) );
 
 		return ! empty( $posts ) ? $posts[0] : null;
 	}
@@ -106,7 +107,7 @@ class Stock_CPT {
 	 *
 	 * @return WP_Post[] Array of stock posts.
 	 */
-	public function get_all_stocks() {
+	public function get_all_stocks(): array {
 		return get_posts( [
 			'post_type'      => self::POST_TYPE,
 			'posts_per_page' => -1,
@@ -122,7 +123,7 @@ class Stock_CPT {
 	 * @param string $symbol Stock symbol.
 	 * @return bool True if exists, false otherwise.
 	 */
-	public function stock_exists( $symbol ) {
+	public function stock_exists( string $symbol ): bool {
 		return null !== $this->get_stock_by_symbol( $symbol );
 	}
 }

@@ -49,8 +49,6 @@ class CocoStockAdmin {
 	 */
 	private initAdminInterface(): void {
 		this.initAddStock();
-		this.initForceBuffer();
-		this.initAutoRefresh();
 	}
 
 	/**
@@ -90,16 +88,17 @@ class CocoStockAdmin {
 					if ( response.success ) {
 						showMessage( response.data, 'success', '#add-stock-result' );
 						newStockSymbolInput.value = '';
-						// Reload page after short delay
+						// Reload page to refresh buffer info after adding stock
 						setTimeout( () => {
-							location.reload();
-						}, 1500 );
+							window.location.reload();
+						}, 1000 );
 					} else {
 						showMessage( response.data, 'error', '#add-stock-result' );
 					}
 				} )
-				.catch( () => {
-					showMessage( 'An error occurred while adding the stock', 'error', '#add-stock-result' );
+				.catch( ( error: unknown ) => {
+					console.error(error);
+					showMessage( 'An error occurred while adding the stock: ' + error, 'error', '#add-stock-result' );
 				} )
 				.finally( () => {
 					button.disabled = false;
@@ -115,105 +114,11 @@ class CocoStockAdmin {
 		} );
 	}
 
-	/**
-	 * Initialize force buffer functionality
-	 */
-	private initForceBuffer(): void {
-		const forceBufferButton = document.getElementById( 'force-buffer' );
 
-		if ( ! forceBufferButton ) {
-			return;
-		}
 
-		forceBufferButton.addEventListener( 'click', ( e ) => {
-			e.preventDefault();
 
-			const button = e.currentTarget as HTMLButtonElement;
-			const originalText = button.textContent || '';
 
-			button.disabled = true;
-			button.textContent = 'Processing...';
 
-			makeAjaxRequest( {
-				action: 'cocostock_force_buffer',
-			} )
-				.then( ( response ) => {
-					if ( response.success ) {
-						showMessage( 'Buffer processing completed', 'success', '#buffer-result' );
-						// Reload page after short delay
-						setTimeout( () => {
-							location.reload();
-						}, 2000 );
-					} else {
-						showMessage( 'Failed to process buffer', 'error', '#buffer-result' );
-					}
-				} )
-				.catch( () => {
-					showMessage( 'An error occurred while processing buffer', 'error', '#buffer-result' );
-				} )
-				.finally( () => {
-					button.disabled = false;
-					button.textContent = originalText;
-				} );
-		} );
-	}
-
-	/**
-	 * Initialize auto-refresh functionality
-	 */
-	private initAutoRefresh(): void {
-		// Auto-refresh buffer info every 30 seconds
-		setInterval( () => {
-			this.refreshBufferInfo();
-		}, 30000 );
-	}
-
-	/**
-	 * Refresh buffer information
-	 */
-	private refreshBufferInfo(): void {
-		makeAjaxRequest( {
-			action: 'cocostock_get_buffer_info',
-		} )
-			.then( ( response ) => {
-				if ( response.success ) {
-					this.updateBufferDisplay( response.data );
-				}
-			} )
-			.catch( () => {
-				// Silently fail for auto-refresh
-			} );
-	}
-
-	/**
-	 * Update buffer display
-	 *
-	 * @param data Buffer data
-	 */
-	private updateBufferDisplay( data: any ): void {
-		const bufferInfoElement = document.querySelector( '.cocostock-buffer-info' );
-
-		if ( ! bufferInfoElement ) {
-			return;
-		}
-
-		const paragraphs = bufferInfoElement.querySelectorAll( 'p' );
-
-		// Update buffer count
-		if ( paragraphs[ 0 ] ) {
-			paragraphs[ 0 ].innerHTML = `<strong>Stocks in Buffer:</strong> ${ data.count }`;
-		}
-
-		// Update last processed time
-		if ( paragraphs[ 1 ] ) {
-			paragraphs[ 1 ].innerHTML = `<strong>Last Processing:</strong> ${ data.last_processed }`;
-		}
-
-		// Update next processing time
-		if ( paragraphs[ 2 ] ) {
-			paragraphs[ 2 ].innerHTML = `<strong>Next Processing:</strong> ${ data.next_processing }`;
-		}
-	}
 }
 
 // Initialize admin functionality when DOM is ready

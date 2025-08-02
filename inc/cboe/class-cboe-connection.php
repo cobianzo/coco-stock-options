@@ -36,7 +36,7 @@ class CboeConnection {
 	 * @param string $symbol Stock symbol (e.g., 'LMT').
 	 * @return array|WP_Error Options data array or WP_Error on failure.
 	 */
-	public function get_stock_options( $symbol ) {
+	public function get_stock_options( string $symbol ): array|\WP_Error {
 		$url = self::CBOE_API_BASE . strtoupper( $symbol ) . '.json';
 
 		$response = wp_remote_get( $url, [
@@ -78,7 +78,7 @@ class CboeConnection {
 	 * @param string $symbol Stock symbol.
 	 * @return bool True if exists, false otherwise.
 	 */
-	public function stock_exists_in_cboe( $symbol ) {
+	public function stock_exists_in_cboe( string $symbol ): bool {
 		$data = $this->get_stock_options( $symbol );
 
 		if ( is_wp_error( $data ) ) {
@@ -95,7 +95,7 @@ class CboeConnection {
 	 * @param array $cboe_data CBOE API response data.
 	 * @return string|null Timestamp string or null if not found.
 	 */
-	public function get_cboe_timestamp( $cboe_data ) {
+	public function get_cboe_timestamp( array $cboe_data ): ?string {
 		if ( ! is_array( $cboe_data ) || ! isset( $cboe_data['data'] ) ) {
 			return null;
 		}
@@ -119,7 +119,7 @@ class CboeConnection {
 	 * @param array $cboe_data CBOE API response data.
 	 * @return bool True if valid, false otherwise.
 	 */
-	public function validate_cboe_response( $cboe_data ) {
+	public function validate_cboe_response( array $cboe_data ): bool {
 		if ( ! is_array( $cboe_data ) ) {
 			return false;
 		}
@@ -134,7 +134,7 @@ class CboeConnection {
 	 * @param array $cboe_data CBOE API response data.
 	 * @return array Array of expiration dates.
 	 */
-	public function get_expiration_dates( $cboe_data ) {
+	public function get_expiration_dates( array $cboe_data ): array {
 		if ( ! $this->validate_cboe_response( $cboe_data ) ) {
 			return [];
 		}
@@ -159,7 +159,7 @@ class CboeConnection {
 	 *
 	 * @return array Test results.
 	 */
-	public function test_connectivity() {
+	public function test_connectivity(): array {
 		$results = [
 			'status'    => 'unknown',
 			'message'   => '',

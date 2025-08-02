@@ -38,14 +38,17 @@ export async function makeAjaxRequest( data: Record<string, string> ): Promise<a
 	} );
 
 	try {
-		const response = await apiFetch( {
+		const response: any = await apiFetch( {
 			url: window.cocoStockOptions.ajaxUrl,
 			method: 'POST',
 			body: formData,
-			parse: false, // We'll parse JSON manually to match previous behavior
+			parse: true,
 		} );
-		const json = JSON.parse( response as unknown as string );
-		return json;
+		// const json = JSON.parse( response as unknown as string );
+		if (!response.success) {
+			throw new Error( response.data );
+		}
+		return response;
 	} catch ( error: any ) {
 		if ( error && error.message ) {
 			throw new Error( error.message );

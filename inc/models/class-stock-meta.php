@@ -21,7 +21,7 @@ class Stock_Meta {
 	 * @param array  $options_data Options data array.
 	 * @return bool|int Meta ID on success, false on failure.
 	 */
-	public function save_stock_options( $post_id, $meta_key, $options_data ) {
+	public function save_stock_options( int $post_id, string $meta_key, array $options_data ): bool|int {
 		return update_post_meta( $post_id, $meta_key, $options_data );
 	}
 
@@ -32,7 +32,7 @@ class Stock_Meta {
 	 * @param string $meta_key Meta key.
 	 * @return array|false Options data array or false if not found.
 	 */
-	public function get_stock_options( $post_id, $meta_key ) {
+	public function get_stock_options( int $post_id, string $meta_key ): array|false {
 		$data = get_post_meta( $post_id, $meta_key, true );
 		return ! empty( $data ) ? $data : false;
 	}
@@ -44,7 +44,7 @@ class Stock_Meta {
 	 * @param string $meta_key Meta key.
 	 * @return bool True on success, false on failure.
 	 */
-	public function delete_stock_options( $post_id, $meta_key ) {
+	public function delete_stock_options( int $post_id, string $meta_key ): bool {
 		return delete_post_meta( $post_id, $meta_key );
 	}
 
@@ -54,7 +54,7 @@ class Stock_Meta {
 	 * @param int $post_id Stock post ID.
 	 * @return array Array of meta keys.
 	 */
-	public function get_stock_options_keys( $post_id ) {
+	public function get_stock_options_keys( int $post_id ): array {
 		global $wpdb;
 
 		$meta_keys = $wpdb->get_col( $wpdb->prepare(
@@ -71,7 +71,7 @@ class Stock_Meta {
 	 * @param int $post_id Stock post ID.
 	 * @return array|false Latest option data or false if none found.
 	 */
-	public function get_latest_option_data( $post_id ) {
+	public function get_latest_option_data( int $post_id ): array|false {
 		$options_keys = $this->get_stock_options_keys( $post_id );
 		$latest_data  = false;
 		$latest_time  = null;

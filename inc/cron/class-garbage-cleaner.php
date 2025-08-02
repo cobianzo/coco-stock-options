@@ -21,14 +21,14 @@ class GarbageCleaner {
 	 *
 	 * @var Stock_CPT
 	 */
-	private $stock_cpt;
+	private Stock_CPT $stock_cpt;
 
 	/**
 	 * Stock Meta instance
 	 *
 	 * @var Stock_Meta
 	 */
-	private $stock_meta;
+	private Stock_Meta $stock_meta;
 
 	/**
 	 * Maximum age for CBOE timestamp in hours
@@ -51,7 +51,7 @@ class GarbageCleaner {
 	 *
 	 * @return array Cleanup results.
 	 */
-	public function clean_all_stocks() {
+	public function clean_all_stocks(): array {
 		$results = [
 			'success'   => false,
 			'processed' => 0,
@@ -93,7 +93,7 @@ class GarbageCleaner {
 	 * @param int $post_id Stock post ID.
 	 * @return array Cleanup results.
 	 */
-	public function clean_stock_options( $post_id ) {
+	public function clean_stock_options( int $post_id ): array {
 		$results = [
 			'deleted' => 0,
 			'errors'  => [],
@@ -148,7 +148,7 @@ class GarbageCleaner {
 	 * @param string $end_date End date (Y-m-d).
 	 * @return array Cleanup results.
 	 */
-	public function clean_options_by_date_range( $start_date, $end_date ) {
+	public function clean_options_by_date_range( string $start_date, string $end_date ): array {
 		$results = [
 			'deleted' => 0,
 			'errors'  => [],
@@ -194,7 +194,7 @@ class GarbageCleaner {
 	 *
 	 * @return array Statistics.
 	 */
-	public function get_cleanup_statistics() {
+	public function get_cleanup_statistics(): array {
 		$stats = [
 			'total_stocks'         => 0,
 			'total_options'        => 0,
@@ -251,7 +251,7 @@ class GarbageCleaner {
 	/**
 	 * Schedule automatic cleanup
 	 */
-	public function schedule_cleanup() {
+	public function schedule_cleanup(): void {
 		if ( ! wp_next_scheduled( 'cocostock_cleanup_old_options' ) ) {
 			wp_schedule_event( time(), 'daily', 'cocostock_cleanup_old_options' );
 		}
@@ -260,7 +260,7 @@ class GarbageCleaner {
 	/**
 	 * Unschedule automatic cleanup
 	 */
-	public function unschedule_cleanup() {
+	public function unschedule_cleanup(): void {
 		wp_clear_scheduled_hook( 'cocostock_cleanup_old_options' );
 	}
 }

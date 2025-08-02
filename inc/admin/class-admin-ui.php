@@ -23,7 +23,7 @@ class Admin_UI {
 	/**
 	 * Initialize WordPress hooks
 	 */
-	private function init_hooks() {
+	private function init_hooks(): void {
 		add_action( 'add_meta_boxes', [ $this, 'add_stock_meta_boxes' ] );
 		add_action( 'add_meta_boxes', [ $this, 'remove_slug_meta_box' ] );
 		add_filter( 'manage_stock_posts_columns', [ $this, 'add_stock_columns' ] );
@@ -33,7 +33,7 @@ class Admin_UI {
 	/**
 	 * Add meta boxes for stock post type
 	 */
-	public function add_stock_meta_boxes() {
+	public function add_stock_meta_boxes(): void {
 		add_meta_box(
 			'stock_options_info',
 			__( 'Stock Options Information', 'coco-stock-options' ),
@@ -47,7 +47,7 @@ class Admin_UI {
 	/**
 	 * Remove slug meta box for stock post type
 	 */
-	public function remove_slug_meta_box() {
+	public function remove_slug_meta_box(): void {
 		remove_meta_box( 'slugdiv', 'stock', 'normal' );
 	}
 
@@ -56,7 +56,7 @@ class Admin_UI {
 	 *
 	 * @param WP_Post $post Post object.
 	 */
-	public function render_stock_options_meta_box( $post ) {
+	public function render_stock_options_meta_box( \WP_Post $post ): void {
 		$stock_meta    = new \CocoStockOptions\Models\Stock_Meta();
 		$options_keys  = $stock_meta->get_stock_options_keys( $post->ID );
 		$options_count = count( $options_keys );
@@ -81,7 +81,7 @@ class Admin_UI {
 	 * @param array $columns Existing columns.
 	 * @return array Modified columns.
 	 */
-	public function add_stock_columns( $columns ) {
+	public function add_stock_columns( array $columns ): array {
 		$new_columns = [];
 
 		foreach ( $columns as $key => $value ) {
@@ -101,7 +101,7 @@ class Admin_UI {
 	 * @param string $column Column name.
 	 * @param int    $post_id Post ID.
 	 */
-	public function render_stock_columns( $column, $post_id ) {
+	public function render_stock_columns( string $column, int $post_id ): void {
 		$stock_meta = new \CocoStockOptions\Models\Stock_Meta();
 		switch ( $column ) {
 			case 'options_count':

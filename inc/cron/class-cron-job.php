@@ -18,14 +18,14 @@ class CronJob {
 	 *
 	 * @var BufferManager
 	 */
-	private $buffer_manager;
+	private BufferManager $buffer_manager;
 
 	/**
 	 * Initialize the cron job
 	 *
 	 * @param BufferManager $buffer_manager Buffer Manager instance.
 	 */
-	public function __construct( $buffer_manager ) {
+	public function __construct( BufferManager $buffer_manager ) {
 		$this->buffer_manager = $buffer_manager;
 		$this->init_hooks();
 	}
@@ -33,7 +33,7 @@ class CronJob {
 	/**
 	 * Initialize WordPress hooks
 	 */
-	private function init_hooks() {
+	private function init_hooks(): void {
 		add_action( 'cocostock_update_buffer', [ $this, 'update_buffer' ] );
 		add_action( 'cocostock_process_buffer_batch', [ $this, 'process_buffer_batch' ] );
 		add_action( 'cocostock_cleanup_old_options', [ $this, 'cleanup_old_options' ] );
@@ -48,7 +48,7 @@ class CronJob {
 	 * @param array $schedules Existing schedules.
 	 * @return array Modified schedules.
 	 */
-	public function add_cron_schedules( $schedules ) {
+	public function add_cron_schedules( array $schedules ): array {
 		$schedules['every_15_minutes'] = [
 			'interval' => 15 * MINUTE_IN_SECONDS,
 			'display'  => __( 'Every 15 minutes', 'coco-stock-options' ),
@@ -65,7 +65,7 @@ class CronJob {
 	/**
 	 * Update buffer with all stocks
 	 */
-	public function update_buffer() {
+	public function update_buffer(): void {
 		// Update last cron run time
 		update_option( 'cocostock_last_cron_run', current_time( 'mysql' ) );
 
@@ -86,7 +86,7 @@ class CronJob {
 	/**
 	 * Process a batch of stocks from the buffer
 	 */
-	public function process_buffer_batch() {
+	public function process_buffer_batch(): void {
 		$batch_size = get_option( 'cocostock_batch_size', 5 );
 		$results    = $this->buffer_manager->process_batch( $batch_size );
 
@@ -113,7 +113,7 @@ class CronJob {
 	/**
 	 * Cleanup old options data
 	 */
-	public function cleanup_old_options() {
+	public function cleanup_old_options(): void {
 		// This will be handled by the GarbageCleaner class
 		// We'll trigger it here for the cron job
 		do_action( 'cocostock_cleanup_old_options' );
@@ -124,7 +124,7 @@ class CronJob {
 	/**
 	 * Trigger buffer processing
 	 */
-	private function trigger_buffer_processing() {
+	private function trigger_buffer_processing(): void {
 		// Check if buffer processing is already scheduled
 		$next_scheduled = wp_next_scheduled( 'cocostock_process_buffer_batch' );
 
@@ -138,7 +138,7 @@ class CronJob {
 	 *
 	 * @param string $schedule Cron schedule.
 	 */
-	public function schedule_update_buffer( $schedule ) {
+	public function schedule_update_buffer( string $schedule ): void {
 		// Clear existing schedule
 		wp_clear_scheduled_hook( 'cocostock_update_buffer' );
 
@@ -151,7 +151,7 @@ class CronJob {
 	/**
 	 * Unschedule all cron jobs
 	 */
-	public function unschedule_all() {
+	public function unschedule_all(): void {
 		wp_clear_scheduled_hook( 'cocostock_update_buffer' );
 		wp_clear_scheduled_hook( 'cocostock_process_buffer_batch' );
 		wp_clear_scheduled_hook( 'cocostock_cleanup_old_options' );
@@ -162,7 +162,7 @@ class CronJob {
 	 *
 	 * @return array Cron status information.
 	 */
-	public function get_cron_status() {
+	public function get_cron_status(): array {
 		$status = [
 			'update_buffer_scheduled' => wp_next_scheduled( 'cocostock_update_buffer' ),
 			'process_batch_scheduled' => wp_next_scheduled( 'cocostock_process_buffer_batch' ),
@@ -179,7 +179,7 @@ class CronJob {
 	 *
 	 * @param string $message Log message.
 	 */
-	private function log_cron_execution( $message ) {
+	private function log_cron_execution( string $message ): void {
 		$log_entry = [
 			'timestamp' => current_time( 'mysql' ),
 			'message'   => $message,
@@ -202,7 +202,7 @@ class CronJob {
 	 * @param int $limit Number of log entries to return.
 	 * @return array Log entries.
 	 */
-	public function get_recent_logs( $limit = 10 ) {
+	public function get_recent_logs( int $limit = 10 ): array {
 		$logs = get_option( 'cocostock_cron_logs', [] );
 		return array_slice( $logs, -$limit );
 	}
@@ -210,7 +210,7 @@ class CronJob {
 	/**
 	 * Clear cron logs
 	 */
-	public function clear_logs() {
+	public function clear_logs(): void {
 		delete_option( 'cocostock_cron_logs' );
 	}
 
@@ -219,7 +219,7 @@ class CronJob {
 	 *
 	 * @return array Test results.
 	 */
-	public function test_cron_functionality() {
+	public function test_cron_functionality(): array {
 		$results = [
 			'success' => false,
 			'message' => '',

@@ -21,14 +21,14 @@ class WordPressApi {
 	 *
 	 * @var Stock_CPT
 	 */
-	private $stock_cpt;
+	private Stock_CPT $stock_cpt;
 
 	/**
 	 * Stock Meta instance
 	 *
 	 * @var Stock_Meta
 	 */
-	private $stock_meta;
+	private Stock_Meta $stock_meta;
 
 	/**
 	 * Initialize the WordPress API
@@ -45,14 +45,14 @@ class WordPressApi {
 	/**
 	 * Initialize WordPress hooks
 	 */
-	private function init_hooks() {
+	private function init_hooks(): void {
 		add_action( 'rest_api_init', [ $this, 'register_rest_routes' ] );
 	}
 
 	/**
 	 * Register REST API routes
 	 */
-	public function register_rest_routes() {
+	public function register_rest_routes(): void {
 		register_rest_route( 'coco/v1', '/puts/(?P<symbol>[a-zA-Z]+)', [
 			'methods'             => 'GET',
 			'callback'            => [ $this, 'get_puts_options' ],
@@ -84,7 +84,7 @@ class WordPressApi {
 	 * @param \WP_REST_Request $request Request object.
 	 * @return \WP_REST_Response|\WP_Error Response object.
 	 */
-	public function get_puts_options( $request ) {
+	public function get_puts_options( \WP_REST_Request $request ): \WP_REST_Response|\WP_Error {
 		$symbol = strtoupper( $request->get_param( 'symbol' ) );
 		$date   = $request->get_param( 'date' );
 		$strike = $request->get_param( 'strike' );
@@ -120,7 +120,7 @@ class WordPressApi {
 	 * @param int $post_id Stock post ID.
 	 * @return \WP_REST_Response Response object.
 	 */
-	private function get_all_options_for_stock( $post_id ) {
+	private function get_all_options_for_stock( int $post_id ): \WP_REST_Response {
 		$options_keys = $this->stock_meta->get_stock_options_keys( $post_id );
 		$options_data = [];
 
@@ -138,7 +138,7 @@ class WordPressApi {
 	 * @param string $date Date in format YYMMDD.
 	 * @return \WP_REST_Response|\WP_Error Response object.
 	 */
-	private function get_options_for_date( $post_id, $date ) {
+	private function get_options_for_date( int $post_id, string $date ): \WP_REST_Response|\WP_Error {
 		$options_keys = $this->stock_meta->get_stock_options_keys( $post_id );
 		$options_data = [];
 
@@ -169,7 +169,7 @@ class WordPressApi {
 	 * @param string $field Specific field to return.
 	 * @return \WP_REST_Response|\WP_Error Response object.
 	 */
-	private function get_specific_option( $post_id, $date, $strike, $field ) {
+	private function get_specific_option( int $post_id, string $date, string $strike, ?string $field ): \WP_REST_Response|\WP_Error {
 		// Convert strike to the format used in meta key
 		$strike_formatted = $this->format_strike_for_meta_key( $strike );
 		if ( ! $strike_formatted ) {
@@ -223,7 +223,7 @@ class WordPressApi {
 	 * @param string $strike Strike price.
 	 * @return string|false Formatted strike or false on failure.
 	 */
-	private function format_strike_for_meta_key( $strike ) {
+	private function format_strike_for_meta_key( string $strike ): string|false {
 		// Validate strike is numeric
 		if ( ! is_numeric( $strike ) ) {
 			return false;
@@ -241,7 +241,7 @@ class WordPressApi {
 	 * @param string $symbol Stock symbol.
 	 * @return bool True if valid, false otherwise.
 	 */
-	public function validate_symbol( $symbol ) {
+	public function validate_symbol( string $symbol ): bool {
 		return ! empty( $symbol ) && preg_match( '/^[A-Za-z]+$/', $symbol );
 	}
 
@@ -251,7 +251,7 @@ class WordPressApi {
 	 * @param string $date Date in format YYMMDD.
 	 * @return bool True if valid, false otherwise.
 	 */
-	public function validate_date( $date ) {
+	public function validate_date( string $date ): bool {
 		if ( empty( $date ) ) {
 			return true; // Optional parameter
 		}
@@ -265,7 +265,7 @@ class WordPressApi {
 	 * @param string $strike Strike price.
 	 * @return bool True if valid, false otherwise.
 	 */
-	public function validate_strike( $strike ) {
+	public function validate_strike( string $strike ): bool {
 		if ( empty( $strike ) ) {
 			return true; // Optional parameter
 		}
@@ -279,7 +279,7 @@ class WordPressApi {
 	 * @param string $field Field name.
 	 * @return bool True if valid, false otherwise.
 	 */
-	public function validate_field( $field ) {
+	public function validate_field( string $field ): bool {
 		if ( empty( $field ) ) {
 			return true; // Optional parameter
 		}
@@ -321,7 +321,7 @@ class WordPressApi {
 	 *
 	 * @return array API documentation.
 	 */
-	public function get_api_documentation() {
+	public function get_api_documentation(): array {
 		return [
 			'endpoints'  => [
 				'get_all_options'     => [

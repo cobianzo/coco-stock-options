@@ -21,21 +21,21 @@ class SyncCboeData {
 	 *
 	 * @var Stock_CPT
 	 */
-	private $stock_cpt;
+	private Stock_CPT $stock_cpt;
 
 	/**
 	 * Stock Meta instance
 	 *
 	 * @var Stock_Meta
 	 */
-	private $stock_meta;
+	private Stock_Meta $stock_meta;
 
 	/**
 	 * CBOE Connection instance
 	 *
 	 * @var CboeConnection
 	 */
-	private $cboe_connection;
+	private CboeConnection $cboe_connection;
 
 	/**
 	 * Initialize the sync class
@@ -56,7 +56,7 @@ class SyncCboeData {
 	 * @param string $symbol Stock symbol.
 	 * @return array Sync results.
 	 */
-	public function sync_stock_options( $symbol ) {
+	public function sync_stock_options( string $symbol ): array {
 		$results = [
 			'symbol'    => $symbol,
 			'success'   => false,
@@ -109,7 +109,7 @@ class SyncCboeData {
 	 * @param array $cboe_data CBOE API response data.
 	 * @return array Parse results.
 	 */
-	private function parse_and_save_options( $post_id, $cboe_data ) {
+	private function parse_and_save_options( int $post_id, array $cboe_data ): array {
 		$results = [
 			'success'   => false,
 			'processed' => 0,
@@ -170,7 +170,7 @@ class SyncCboeData {
 	 * @param string $current_time Current timestamp.
 	 * @return array|false Parsed option data or false on failure.
 	 */
-	private function parse_single_option( $option, $cboe_timestamp, $current_time ) {
+	private function parse_single_option( array $option, ?string $cboe_timestamp, string $current_time ): array|false {
 		// This parsing logic will need to be adjusted based on actual CBOE API structure
 		$parsed = [
 			'last_update'      => $current_time,
@@ -215,7 +215,7 @@ class SyncCboeData {
 	 * @param array $option CBOE option data.
 	 * @return string|false Meta key or false on failure.
 	 */
-	private function generate_meta_key( $option ) {
+	private function generate_meta_key( array $option ): string|false {
 		if ( ! isset( $option['expiration'] ) || ! isset( $option['strike'] ) || ! isset( $option['type'] ) ) {
 			return false;
 		}
@@ -242,7 +242,7 @@ class SyncCboeData {
 	 * @param string $symbol Stock symbol.
 	 * @return array Status information.
 	 */
-	public function get_sync_status( $symbol ) {
+	public function get_sync_status( string $symbol ): array {
 		$stock_post = $this->stock_cpt->get_stock_by_symbol( $symbol );
 
 		if ( ! $stock_post ) {

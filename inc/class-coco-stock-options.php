@@ -32,86 +32,86 @@ class CocoStockOptions {
 	/**
 	 * Plugin instance
 	 *
-	 * @var CocoStockOptions
+	 * @var CocoStockOptions|null
 	 */
-	private static $instance = null;
+	private static ?CocoStockOptions $instance = null;
 
 	/**
 	 * Stock CPT instance
 	 *
 	 * @var Stock_CPT
 	 */
-	private $stock_cpt;
+	private Stock_CPT $stock_cpt;
 
 	/**
 	 * Stock Meta instance
 	 *
 	 * @var Stock_Meta
 	 */
-	private $stock_meta;
+	private Stock_Meta $stock_meta;
 
 	/**
 	 * CBOE Connection instance
 	 *
 	 * @var CboeConnection
 	 */
-	private $cboe_connection;
+	private CboeConnection $cboe_connection;
 
 	/**
 	 * Sync CBOE Data instance
 	 *
 	 * @var SyncCboeData
 	 */
-	private $sync_data;
+	private SyncCboeData $sync_data;
 
 	/**
 	 * Garbage Cleaner instance
 	 *
 	 * @var GarbageCleaner
 	 */
-	private $garbage_cleaner;
+	private GarbageCleaner $garbage_cleaner;
 
 	/**
 	 * Buffer Manager instance
 	 *
 	 * @var BufferManager
 	 */
-	private $buffer_manager;
+	private BufferManager $buffer_manager;
 
 	/**
 	 * Cron Job instance
 	 *
 	 * @var CronJob
 	 */
-	private $cron_job;
+	private CronJob $cron_job;
 
 	/**
 	 * Admin Page instance
 	 *
 	 * @var AdminPage
 	 */
-	private $admin_page;
+	private AdminPage $admin_page;
 
 	/**
 	 * Admin UI instance
 	 *
 	 * @var Admin_UI
 	 */
-	private $admin_ui;
+	private Admin_UI $admin_ui;
 
 	/**
 	 * WordPress API instance
 	 *
 	 * @var WordPressApi
 	 */
-	private $wordpress_api;
+	private WordPressApi $wordpress_api;
 
 	/**
 	 * Get plugin instance
 	 *
 	 * @return CocoStockOptions Plugin instance.
 	 */
-	public static function get_instance() {
+	public static function get_instance(): CocoStockOptions {
 		if ( null === self::$instance ) {
 			self::$instance = new self();
 		}
@@ -129,7 +129,7 @@ class CocoStockOptions {
 	/**
 	 * Initialize plugin components
 	 */
-	private function init_components() {
+	private function init_components(): void {
 		// Initialize core components
 		$this->stock_cpt       = new Stock_CPT();
 		$this->stock_meta      = new Stock_Meta();
@@ -146,7 +146,7 @@ class CocoStockOptions {
 	/**
 	 * Initialize WordPress hooks
 	 */
-	private function init_hooks() {
+	private function init_hooks(): void {
 		add_action( 'init', [ $this, 'init_plugin' ] );
 		add_action( 'plugins_loaded', [ $this, 'load_textdomain' ] );
 		add_action( 'wp_loaded', [ $this, 'setup_cron_jobs' ] );
@@ -159,7 +159,7 @@ class CocoStockOptions {
 	/**
 	 * Initialize plugin
 	 */
-	public function init_plugin() {
+	public function init_plugin(): void {
 		// Plugin initialization logic
 		do_action( 'cocostock_init' );
 	}
@@ -167,7 +167,7 @@ class CocoStockOptions {
 	/**
 	 * Load text domain
 	 */
-	public function load_textdomain() {
+	public function load_textdomain(): void {
 		load_plugin_textdomain(
 			'coco-stock-options',
 			false,
@@ -178,7 +178,7 @@ class CocoStockOptions {
 	/**
 	 * Setup cron jobs
 	 */
-	public function setup_cron_jobs() {
+	public function setup_cron_jobs(): void {
 		$schedule = get_option( 'cocostock_cron_schedule', 'never' );
 
 		if ( 'never' !== $schedule ) {
@@ -194,7 +194,7 @@ class CocoStockOptions {
 	/**
 	 * Plugin activation
 	 */
-	public function activate() {
+	public function activate(): void {
 		// Create database tables if needed
 		$this->create_tables();
 
@@ -208,7 +208,7 @@ class CocoStockOptions {
 	/**
 	 * Plugin deactivation
 	 */
-	public function deactivate() {
+	public function deactivate(): void {
 		// Clear scheduled cron jobs
 		$this->cron_job->unschedule_all();
 
@@ -219,7 +219,7 @@ class CocoStockOptions {
 	/**
 	 * Create database tables
 	 */
-	private function create_tables() {
+	private function create_tables(): void {
 		// No custom tables needed for this plugin
 		// All data is stored in WordPress post meta
 	}
@@ -227,7 +227,7 @@ class CocoStockOptions {
 	/**
 	 * Set default options
 	 */
-	private function set_default_options() {
+	private function set_default_options(): void {
 		if ( ! get_option( 'cocostock_cron_schedule' ) ) {
 			update_option( 'cocostock_cron_schedule', 'never' );
 		}
@@ -242,7 +242,7 @@ class CocoStockOptions {
 	 *
 	 * @return Stock_CPT Stock CPT instance.
 	 */
-	public function get_stock_cpt() {
+	public function get_stock_cpt(): Stock_CPT {
 		return $this->stock_cpt;
 	}
 
@@ -251,7 +251,7 @@ class CocoStockOptions {
 	 *
 	 * @return Stock_Meta Stock Meta instance.
 	 */
-	public function get_stock_meta() {
+	public function get_stock_meta(): Stock_Meta {
 		return $this->stock_meta;
 	}
 
@@ -260,7 +260,7 @@ class CocoStockOptions {
 	 *
 	 * @return CboeConnection CBOE Connection instance.
 	 */
-	public function get_cboe_connection() {
+	public function get_cboe_connection(): CboeConnection {
 		return $this->cboe_connection;
 	}
 
@@ -269,7 +269,7 @@ class CocoStockOptions {
 	 *
 	 * @return SyncCboeData Sync CBOE Data instance.
 	 */
-	public function get_sync_data() {
+	public function get_sync_data(): SyncCboeData {
 		return $this->sync_data;
 	}
 
@@ -278,7 +278,7 @@ class CocoStockOptions {
 	 *
 	 * @return GarbageCleaner Garbage Cleaner instance.
 	 */
-	public function get_garbage_cleaner() {
+	public function get_garbage_cleaner(): GarbageCleaner {
 		return $this->garbage_cleaner;
 	}
 
@@ -287,7 +287,7 @@ class CocoStockOptions {
 	 *
 	 * @return BufferManager Buffer Manager instance.
 	 */
-	public function get_buffer_manager() {
+	public function get_buffer_manager(): BufferManager {
 		return $this->buffer_manager;
 	}
 
@@ -296,7 +296,7 @@ class CocoStockOptions {
 	 *
 	 * @return CronJob Cron Job instance.
 	 */
-	public function get_cron_job() {
+	public function get_cron_job(): CronJob {
 		return $this->cron_job;
 	}
 
@@ -305,7 +305,7 @@ class CocoStockOptions {
 	 *
 	 * @return AdminPage Admin Page instance.
 	 */
-	public function get_admin_page() {
+	public function get_admin_page(): AdminPage {
 		return $this->admin_page;
 	}
 
@@ -314,7 +314,7 @@ class CocoStockOptions {
 	 *
 	 * @return WordPressApi WordPress API instance.
 	 */
-	public function get_wordpress_api() {
+	public function get_wordpress_api(): WordPressApi {
 		return $this->wordpress_api;
 	}
 
@@ -323,7 +323,7 @@ class CocoStockOptions {
 	 *
 	 * @return array Plugin information.
 	 */
-	public function get_plugin_info() {
+	public function get_plugin_info(): array {
 		return [
 			'version'     => self::VERSION,
 			'name'        => 'Coco Stock Options',
@@ -347,7 +347,7 @@ class CocoStockOptions {
 	 *
 	 * @return array Plugin status.
 	 */
-	public function get_plugin_status() {
+	public function get_plugin_status(): array {
 		$status = [
 			'version'       => self::VERSION,
 			'stocks_count'  => count( $this->stock_cpt->get_all_stocks() ),
@@ -364,7 +364,7 @@ class CocoStockOptions {
 	 *
 	 * @return array Test results.
 	 */
-	public function test_plugin_functionality() {
+	public function test_plugin_functionality(): array {
 		$results = [
 			'overall_success' => false,
 			'tests'           => [],

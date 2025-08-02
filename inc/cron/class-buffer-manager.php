@@ -32,21 +32,21 @@ class BufferManager {
 	 *
 	 * @var Stock_CPT
 	 */
-	private $stock_cpt;
+	private Stock_CPT $stock_cpt;
 
 	/**
 	 * Stock Meta instance
 	 *
 	 * @var Stock_Meta
 	 */
-	private $stock_meta;
+	private Stock_Meta $stock_meta;
 
 	/**
 	 * Sync CBOE Data instance
 	 *
 	 * @var SyncCboeData
 	 */
-	private $sync_data;
+	private SyncCboeData $sync_data;
 
 	/**
 	 * Initialize the buffer manager
@@ -67,7 +67,7 @@ class BufferManager {
 	 * @param string $symbol Stock symbol.
 	 * @return bool True on success, false on failure.
 	 */
-	public function add_to_buffer( $symbol ) {
+	public function add_to_buffer( string $symbol ): bool {
 		$buffer = $this->get_buffer();
 
 		// Check if already in buffer
@@ -85,7 +85,7 @@ class BufferManager {
 	 * @param array $symbols Array of stock symbols.
 	 * @return bool True on success, false on failure.
 	 */
-	public function add_multiple_to_buffer( $symbols ) {
+	public function add_multiple_to_buffer( array $symbols ): bool {
 		$buffer = $this->get_buffer();
 
 		foreach ( $symbols as $symbol ) {
@@ -103,7 +103,7 @@ class BufferManager {
 	 * @param string $symbol Stock symbol.
 	 * @return bool True on success, false on failure.
 	 */
-	public function remove_from_buffer( $symbol ) {
+	public function remove_from_buffer( string $symbol ): bool {
 		$buffer = $this->get_buffer();
 		$key    = array_search( $symbol, $buffer, true );
 
@@ -122,7 +122,7 @@ class BufferManager {
 	 * @param int $batch_size Number of stocks to process.
 	 * @return array Processing results.
 	 */
-	public function process_batch( $batch_size ) {
+	public function process_batch( int $batch_size ): array {
 		$results = [
 			'processed'    => 0,
 			'successful'   => 0,
@@ -184,7 +184,7 @@ class BufferManager {
 	 *
 	 * @return array Processing results.
 	 */
-	public function force_process_buffer() {
+	public function force_process_buffer(): array {
 		$batch_size = get_option( 'cocostock_batch_size', 5 );
 		return $this->process_batch( $batch_size );
 	}
@@ -194,7 +194,7 @@ class BufferManager {
 	 *
 	 * @return array Buffer information.
 	 */
-	public function get_buffer_info() {
+	public function get_buffer_info(): array {
 		$buffer         = $this->get_buffer();
 		$is_processing  = $this->is_processing();
 		$last_processed = get_option( 'cocostock_last_buffer_processed', 'Never' );
@@ -219,7 +219,7 @@ class BufferManager {
 	 *
 	 * @return array Array of stock symbols.
 	 */
-	public function get_all_stocks_for_buffer() {
+	public function get_all_stocks_for_buffer(): array {
 		$stocks  = $this->stock_cpt->get_all_stocks();
 		$symbols = [];
 
@@ -235,7 +235,7 @@ class BufferManager {
 	 *
 	 * @return bool True on success, false on failure.
 	 */
-	public function clear_buffer() {
+	public function clear_buffer(): bool {
 		return delete_option( self::BUFFER_OPTION );
 	}
 
@@ -244,7 +244,7 @@ class BufferManager {
 	 *
 	 * @return array Array of stock symbols in buffer.
 	 */
-	private function get_buffer() {
+	private function get_buffer(): array {
 		$buffer = get_option( self::BUFFER_OPTION, '' );
 
 		if ( empty( $buffer ) ) {
@@ -260,7 +260,7 @@ class BufferManager {
 	 * @param array $buffer Array of stock symbols.
 	 * @return bool True on success, false on failure.
 	 */
-	private function save_buffer( $buffer ) {
+	private function save_buffer( array $buffer ): bool {
 		$buffer_string = implode( ',', $buffer );
 		return update_option( self::BUFFER_OPTION, $buffer_string );
 	}
@@ -270,7 +270,7 @@ class BufferManager {
 	 *
 	 * @param bool $is_processing Whether buffer is being processed.
 	 */
-	private function set_processing_status( $is_processing ) {
+	private function set_processing_status( bool $is_processing ): void {
 		update_option( self::PROCESSING_STATUS_OPTION, $is_processing );
 	}
 
@@ -279,7 +279,7 @@ class BufferManager {
 	 *
 	 * @return bool True if processing, false otherwise.
 	 */
-	private function is_processing() {
+	private function is_processing(): bool {
 		return (bool) get_option( self::PROCESSING_STATUS_OPTION, false );
 	}
 
@@ -288,7 +288,7 @@ class BufferManager {
 	 *
 	 * @return array Buffer statistics.
 	 */
-	public function get_buffer_statistics() {
+	public function get_buffer_statistics(): array {
 		$buffer     = $this->get_buffer();
 		$all_stocks = $this->get_all_stocks_for_buffer();
 
@@ -306,7 +306,7 @@ class BufferManager {
 	 *
 	 * @return array Buffer contents with additional info.
 	 */
-	public function get_buffer_contents() {
+	public function get_buffer_contents(): array {
 		$buffer   = $this->get_buffer();
 		$contents = [];
 

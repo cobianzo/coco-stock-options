@@ -23,28 +23,28 @@ class AdminPage {
 	 *
 	 * @var Stock_CPT
 	 */
-	private $stock_cpt;
+	private Stock_CPT $stock_cpt;
 
 	/**
 	 * Stock Meta instance
 	 *
 	 * @var Stock_Meta
 	 */
-	private $stock_meta;
+	private Stock_Meta $stock_meta;
 
 	/**
 	 * CBOE Connection instance
 	 *
 	 * @var CboeConnection
 	 */
-	private $cboe_connection;
+	private CboeConnection $cboe_connection;
 
 	/**
 	 * Buffer Manager instance
 	 *
 	 * @var BufferManager
 	 */
-	private $buffer_manager;
+	private BufferManager $buffer_manager;
 
 	/**
 	 * Initialize the admin page
@@ -65,17 +65,16 @@ class AdminPage {
 	/**
 	 * Initialize WordPress hooks
 	 */
-	private function init_hooks() {
+	private function init_hooks(): void {
 		add_action( 'admin_menu', [ $this, 'add_admin_menu' ] );
 		add_action( 'admin_init', [ $this, 'handle_form_submissions' ] );
 		add_action( 'wp_ajax_cocostock_add_stock', [ $this, 'ajax_add_stock' ] );
-		add_action( 'wp_ajax_cocostock_force_buffer', [ $this, 'ajax_force_buffer' ] );
 	}
 
 	/**
 	 * Add admin menu
 	 */
-	public function add_admin_menu() {
+public function add_admin_menu(): void {
 		add_submenu_page(
 			'edit.php?post_type=stock',
 			__( 'Coco Stock Options', 'coco-stock-options' ),
@@ -89,7 +88,20 @@ class AdminPage {
 	/**
 	 * Handle form submissions
 	 */
-	public function handle_form_submissions() {
+public function handle_form_submissions(): void {
+		// Handle force buffer action
+		if ( isset( $_POST['cocostock_action'] ) && 'force_buffer' === $_POST['cocostock_action'] ) {
+			$this->handle_force_buffer();
+			return;
+		}
+
+		// Handle update buffer action
+		if ( isset( $_POST['cocostock_action'] ) && 'update_buffer' === $_POST['cocostock_action'] ) {
+			$this->handle_update_buffer();
+			return;
+		}
+
+		// Handle other form submissions
 		if ( ! isset( $_POST['cocostock_nonce'] ) || ! wp_verify_nonce( $_POST['cocostock_nonce'], 'cocostock_admin_action' ) ) {
 			return;
 		}
@@ -106,7 +118,7 @@ class AdminPage {
 	/**
 	 * Handle cron schedule update
 	 */
-	private function handle_cron_schedule_update() {
+private function handle_cron_schedule_update(): void {
 		$schedule = sanitize_text_field( $_POST['cocostock_cron_schedule'] );
 		update_option( 'cocostock_cron_schedule', $schedule );
 
@@ -121,10 +133,87 @@ class AdminPage {
 		} );
 	}
 
+		/**
+	 * Handle force buffer processing
+	 */
+private function handle_force_buffer(): void {
+		if ( ! isset( $_POST['cocostock_force_buffer_nonce'] ) || ! wp_verify_nonce( $_POST['cocostock_force_buffer_nonce'], 'cocostock_force_buffer' ) ) {
+			add_action( 'admin_notices', function () {
+				echo '<div class="notice notice-error"><p>' . esc_html__( 'Security check failed.', 'coco-stock-options' ) . '</p></div>';
+			} );
+			return;
+		}
+
+		if ( ! current_user_can( 'manage_options' ) ) {
+			add_action( 'admin_notices', function () {
+				echo '<div class="notice notice-error"><p>' . esc_html__( 'Unauthorized access.', 'coco-stock-options' ) . '</p></div>';
+			} );
+			return;
+		}
+
+		$result = $this->buffer_manager->force_process_buffer();
+
+		if ( $result ) {
+			add_action( 'admin_notices', function () {
+				echo '<div class="notice notice-success"><p>' . esc_html__( 'Buffer processing completed successfully.', 'coco-stock-options' ) . '</p></div>';
+			} );
+		} else {
+			add_action( 'admin_notices', function () {
+				echo '<div class="notice notice-error"><p>' . esc_html__( 'Failed to process buffer.', 'coco-stock-options' ) . '</p></div>';
+			} );
+		}
+	}
+
+	/**
+	 * Handle update buffer action
+	 */
+private function handle_update_buffer(): void {
+		if ( ! isset( $_POST['cocostock_update_buffer_nonce'] ) || ! wp_verify_nonce( $_POST['cocostock_update_buffer_nonce'], 'cocostock_update_buffer' ) ) {
+			add_action( 'admin_notices', function () {
+				echo '<div class="notice notice-error"><p>' . esc_html__( 'Security check failed.', 'coco-stock-options' ) . '</p></div>';
+			} );
+			return;
+		}
+
+		if ( ! current_user_can( 'manage_options' ) ) {
+			add_action( 'admin_notices', function () {
+				echo '<div class="notice notice-error"><p>' . esc_html__( 'Unauthorized access.', 'coco-stock-options' ) . '</p></div>';
+			} );
+			return;
+		}
+
+		// Get all stocks that are not in the buffer
+		$all_stocks = $this->buffer_manager->get_all_stocks_for_buffer();
+		$current_buffer_contents = $this->buffer_manager->get_buffer_contents();
+		$current_buffer_symbols = array_column( $current_buffer_contents, 'symbol' );
+		$stocks_to_add = array_diff( $all_stocks, $current_buffer_symbols );
+
+		if ( empty( $stocks_to_add ) ) {
+			add_action( 'admin_notices', function () {
+				echo '<div class="notice notice-info"><p>' . esc_html__( 'All stocks are already in the buffer.', 'coco-stock-options' ) . '</p></div>';
+			} );
+			return;
+		}
+
+		// Add stocks to buffer
+		$result = $this->buffer_manager->add_multiple_to_buffer( $stocks_to_add );
+
+		if ( $result ) {
+			$count = count( $stocks_to_add );
+			add_action( 'admin_notices', function () use ( $count ) {
+				echo '<div class="notice notice-success"><p>' . esc_html( sprintf( __( 'Buffer updated successfully. Added %d stocks to buffer.', 'coco-stock-options' ), $count ) ) . '</p></div>';
+			} );
+		} else {
+			add_action( 'admin_notices', function () {
+				echo '<div class="notice notice-error"><p>' . esc_html__( 'Failed to update buffer.', 'coco-stock-options' ) . '</p></div>';
+			} );
+		}
+	}
+
 	/**
 	 * Handle batch size update
 	 */
-	private function handle_batch_size_update() {
+private function handle_batch_size_update(): void {
 		$batch_size = (int) $_POST['cocostock_batch_size'];
 		if ( $batch_size > 0 ) {
 			update_option( 'cocostock_batch_size', $batch_size );
@@ -137,12 +226,16 @@ class AdminPage {
 	/**
 	 * AJAX handler for adding stock
 	 */
-	public function ajax_add_stock() {
-		check_ajax_referer( 'cocostock_ajax_nonce', 'nonce' );
+public function ajax_add_stock(): void {
+		if ( empty( $_POST['nonce'] ) || ! wp_verify_nonce( $_POST['nonce'], 'cocostock_ajax_nonce' ) ) {
+			wp_send_json_error( 'Invalid or missing nonce: ' . $_POST['nonce'] );
+		}
+
 
 		if ( ! current_user_can( 'manage_options' ) ) {
-			wp_die( 'Unauthorized' );
+			wp_send_json_error( 'Unauthorized' );
 		}
+
 
 		$symbol = sanitize_text_field( $_POST['symbol'] );
 
@@ -162,7 +255,6 @@ class AdminPage {
 
 		// Create stock
 		$post_id = $this->stock_cpt->create_stock( $symbol );
-
 		if ( is_wp_error( $post_id ) ) {
 			wp_send_json_error( 'Failed to create stock' );
 		}
@@ -173,24 +265,47 @@ class AdminPage {
 		wp_send_json_success( sprintf( 'Stock %s added successfully', $symbol ) );
 	}
 
+
+
 	/**
-	 * AJAX handler for forcing buffer processing
+	 * Render buffer info HTML
+	 *
+	 * @return string HTML content for buffer info section.
 	 */
-	public function ajax_force_buffer() {
-		check_ajax_referer( 'cocostock_ajax_nonce', 'nonce' );
+private function render_buffer_info_html(): string {
+		$buffer_info = $this->buffer_manager->get_buffer_info();
 
-		if ( ! current_user_can( 'manage_options' ) ) {
-			wp_die( 'Unauthorized' );
-		}
+		ob_start();
+		?>
+		<p><strong><?php esc_html_e( 'Stocks in Buffer:', 'coco-stock-options' ); ?></strong> <?php echo esc_html( $buffer_info['count'] ); ?></p>
+		<p><strong><?php esc_html_e( 'Last Processing:', 'coco-stock-options' ); ?></strong> <?php echo esc_html( $buffer_info['last_processed'] ); ?></p>
+		<p><strong><?php esc_html_e( 'Next Processing:', 'coco-stock-options' ); ?></strong> <?php echo esc_html( $buffer_info['next_processing'] ); ?></p>
 
-		$result = $this->buffer_manager->force_process_buffer();
-		wp_send_json_success( $result );
+		<?php if ( $buffer_info['count'] > 0 && ! $buffer_info['is_processing'] ) : ?>
+			<form method="post" style="display: inline;">
+				<?php wp_nonce_field( 'cocostock_force_buffer', 'cocostock_force_buffer_nonce' ); ?>
+				<input type="hidden" name="cocostock_action" value="force_buffer" />
+				<button type="submit" class="button button-primary">
+					<?php esc_html_e( 'Force Process Buffer', 'coco-stock-options' ); ?>
+				</button>
+			</form>
+		<?php endif; ?>
+
+		<form method="post" style="display: inline; margin-left: 10px;">
+			<?php wp_nonce_field( 'cocostock_update_buffer', 'cocostock_update_buffer_nonce' ); ?>
+			<input type="hidden" name="cocostock_action" value="update_buffer" />
+			<button type="submit" class="button button-secondary">
+				<?php esc_html_e( 'Update Buffer', 'coco-stock-options' ); ?>
+			</button>
+		</form>
+		<?php
+		return ob_get_clean();
 	}
 
 	/**
 	 * Render admin page
 	 */
-	public function render_admin_page() {
+public function render_admin_page(): void {
 		$current_schedule = get_option( 'cocostock_cron_schedule', 'never' );
 		$batch_size       = get_option( 'cocostock_batch_size', 5 );
 		$stocks           = $this->stock_cpt->get_all_stocks();
@@ -251,17 +366,9 @@ class AdminPage {
 				<div class="cocostock-section">
 					<h2><?php esc_html_e( 'Buffer Information', 'coco-stock-options' ); ?></h2>
 					<div class="cocostock-buffer-info">
-						<p><strong><?php esc_html_e( 'Stocks in Buffer:', 'coco-stock-options' ); ?></strong> <?php echo esc_html( $buffer_info['count'] ); ?></p>
-						<p><strong><?php esc_html_e( 'Last Processing:', 'coco-stock-options' ); ?></strong> <?php echo esc_html( $buffer_info['last_processed'] ); ?></p>
-						<p><strong><?php esc_html_e( 'Next Processing:', 'coco-stock-options' ); ?></strong> <?php echo esc_html( $buffer_info['next_processing'] ); ?></p>
-
-						<?php if ( $buffer_info['count'] > 0 && ! $buffer_info['is_processing'] ) : ?>
-							<button type="button" id="force-buffer" class="button button-primary">
-								<?php esc_html_e( 'Force Process Buffer', 'coco-stock-options' ); ?>
-							</button>
-						<?php endif; ?>
-						<div id="buffer-result"></div>
+						<?php echo $this->render_buffer_info_html(); ?>
 					</div>
+
 				</div>
 
 				<!-- Stocks List Section -->
@@ -303,7 +410,7 @@ class AdminPage {
 												</a>
 												<?php
 												// Add CBOE endpoint link for this stock
-												$symbol = $stock->post_title;
+												$symbol   = $stock->post_title;
 												$cboe_url = 'https://cdn.cboe.com/api/global/delayed_quotes/options/' . urlencode( $symbol ) . '.json';
 												?>
 												<a href="<?php echo esc_url( $cboe_url ); ?>" class="button button-small" target="_blank" rel="noopener noreferrer">
@@ -345,7 +452,7 @@ class AdminPage {
 	 *
 	 * @return array Cron information.
 	 */
-	private function get_cron_info() {
+	private function get_cron_info(): array {
 		$last_run = get_option( 'cocostock_last_cron_run', 'Never' );
 		$next_run = wp_next_scheduled( 'cocostock_update_buffer' );
 
@@ -361,7 +468,7 @@ class AdminPage {
 	 * @param int $post_id Stock post ID.
 	 * @return int Options count.
 	 */
-	private function get_stock_options_count( $post_id ) {
+	private function get_stock_options_count( int $post_id ): int {
 		$keys = $this->stock_meta->get_stock_options_keys( $post_id );
 		return count( $keys );
 	}
@@ -372,7 +479,7 @@ class AdminPage {
 	 * @param int $post_id Stock post ID.
 	 * @return string Last sync time.
 	 */
-	private function get_stock_last_sync( $post_id ) {
+	private function get_stock_last_sync( int $post_id ): string {
 		$keys      = $this->stock_meta->get_stock_options_keys( $post_id );
 		$last_sync = null;
 
