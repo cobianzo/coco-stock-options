@@ -173,6 +173,19 @@ class WordPressApi {
 	 * @return \WP_REST_Response|\WP_Error Response object.
 	 */
 	private function get_options_for_date( int $post_id, string $date, string $type ): \WP_REST_Response|\WP_Error {
+
+		$post_meta_key = get_post_field( 'post_title', $post_id ) . $date . $type;
+		$pp            = $this->stock_meta->get_stock_options(
+			$post_id,
+			$post_meta_key
+		);
+		if ($pp) {
+			return new \WP_REST_Response( $pp, 200 );
+		}
+
+		// TODO: check if this code is needed.
+		// TODO: accept parameter to filter by field
+
 		$options_keys = $this->stock_meta->get_stock_options_keys( $post_id );
 		$options_data = [];
 

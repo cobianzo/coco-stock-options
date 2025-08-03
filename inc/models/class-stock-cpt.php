@@ -97,7 +97,6 @@ class Stock_CPT {
 			'posts_per_page' => 1,
 			'post_status'    => 'publish',
 		] );
-		error_log( '✅ checkpoint TODELETE ' . print_r( $posts, 1 ) );
 
 		return ! empty( $posts ) ? $posts[0] : null;
 	}

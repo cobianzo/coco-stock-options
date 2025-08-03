@@ -1,8 +1,8 @@
 <?php
 /**
- * Plugin Name: Coco Stock Options API plugin
+ * Plugin Name: Coco Stock Options API
  * Plugin URI: https://cobianzo.com/plugins/coco-stock-options/
- * Description: This plugin defines CPT for the required stocks and scans in a cron job the values for the future options for every stock from the API of `https://cdn.cboe.com/api/global/delayed_quotes/options/<stock-symbol>.json`, and formats the result to save it as post meta and expose it in our own REST API under our endpoint `wp-json/coco/puts/lmt?date=250815&strike=350`
+ * Description: This plugin defines CPT for the required stocks and scans in a cron job the values for the future options for every stock from the API of `https://cdn.cboe.com/api/global/delayed_quotes/options/<stock-symbol>.json`, and formats the result to save it as post meta and expose it in our own REST API under our endpoint `wp-json/coco/puts/LMT?date=250815&strike=00310000`
  * Version: 1.0.0
  * Author: cobianzo
  * Author URI: https://cobianzo.com
