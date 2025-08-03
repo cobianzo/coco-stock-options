@@ -1,11 +1,20 @@
 TODO
 ===
 
+Translations
+Hacer el frontend mostrando la informacion tabulada de cada call y put de un ticker en la pagina single. Tambien mostrar botones para los endppints.
+Arreglar bug que dice ultima actualizacion Never.
+Ver por que no funciona en cobianzo.com
+Arreglar todos los phpcs errors
+Anadir phpstan
+Anadir phpunit tests
+Cache all the cacheable things.
+
 
 WHAT IS THIS PROJECT
 ===
 
-This plugin defines Custom Post Types (CPT) for tracking required stocks. It scans for future options values for each stock from the CBOE API (`https://cdn.cboe.com/api/global/delayed_quotes/options/<stock-symbol>.json`) via a cron job. The results are formatted and saved as post meta, then exposed through a custom REST API endpoint, for example: `wp-json/coco/puts/lmt?date=250815&strike=350`.
+This plugin defines Custom Post Types (CPT) for tracking required stocks. It scans for future options values for each stock from the CBOE API (`https://cdn.cboe.com/api/global/delayed_quotes/options/<stock-symbol>.json`) via a cron job. The results are formatted and saved as post meta, then exposed through a custom REST API endpoint, for example: `wp-json/coco/puts/lmt?date=250815&strike=00350000`.
 
 HOW IT WORKS
 ===
@@ -141,11 +150,3 @@ And for the `.json`, needed for the typescript tranlations:
 ```
 wp i18n make-json ./languages/
 ```
-
-# Useful tools to develop shapes
-
-Helps to design the path
-https://boxy-svg.com/app
-
-Helps to undesrstand every point of the path.
-https://svg-path-visualizer.netlify.app/

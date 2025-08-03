@@ -2,24 +2,21 @@
 # This file is distributed under the GPL-2.0-or-later.
 msgid ""
 msgstr ""
-Project-Id-Version: Coco Stock Options API plugin 1.0.0
-
-Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/coco-stock-options
-
+"Project-Id-Version: Coco Stock Options API 1.0.0\n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/coco-stock-options\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2025-07-06T03:28:32+00:00\n"
+"POT-Creation-Date: 2025-08-03T00:50:05+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
-X-Domain: coco-stock-options
-
+"X-Domain: coco-stock-options\n"
 
 #. Plugin Name of the plugin
 #: coco-stock-options.php
-msgid "Coco Mi Plugin"
+msgid "Coco Stock Options API"
 msgstr ""
 
 #. Plugin URI of the plugin
@@ -29,7 +26,7 @@ msgstr ""
 
 #. Description of the plugin
 #: coco-stock-options.php
-msgid "A boilerplate for a new plugin"
+msgid "This plugin defines CPT for the required stocks and scans in a cron job the values for the future options for every stock from the API of `https://cdn.cboe.com/api/global/delayed_quotes/options/<stock-symbol>.json`, and formats the result to save it as post meta and expose it in our own REST API under our endpoint `wp-json/coco/puts/lmt?date=250815&strike=350`"
 msgstr ""
 
 #. Author of the plugin
@@ -42,38 +39,289 @@ msgstr ""
 msgid "https://cobianzo.com"
 msgstr ""
 
-#: build/index.js:293
-msgid "Visual transitions are only available when the Group block uses a 'div' element. Current tag: "
+#: inc/admin/class-admin-page.php:90
+#: inc/admin/class-admin-page.php:387
+msgid "Coco Stock Options"
 msgstr ""
 
-#: build/index.js:294
-msgid "Enable Visual Transition"
+#: inc/admin/class-admin-page.php:91
+msgid "Options Settings"
 msgstr ""
 
-#: build/index.js:299
-msgid "Select Transition Effect"
+#: inc/admin/class-admin-page.php:148
+msgid "Cron job triggered manually."
 msgstr ""
 
-#: build/index.js:312
-msgid "Pattern Height %"
+#: inc/admin/class-admin-page.php:161
+msgid "Next cron job cancelled successfully."
 msgstr ""
 
-#: build/index.js:320
-msgid "Adjust the height of the transition pattern %"
+#: inc/admin/class-admin-page.php:165
+msgid "No cron job scheduled to cancel."
 msgstr ""
 
-#: build/index.js:322
-msgid "Pattern Width %"
+#: inc/admin/class-admin-page.php:192
+msgid "Cron schedule updated successfully."
 msgstr ""
 
-#: build/index.js:330
-msgid "Adjust the width of the transition pattern"
+#: inc/admin/class-admin-page.php:203
+#: inc/admin/class-admin-page.php:234
+msgid "Security check failed."
 msgstr ""
 
-#: build/index.js:332
-msgid "Negative offset Y (px)"
+#: inc/admin/class-admin-page.php:210
+#: inc/admin/class-admin-page.php:241
+msgid "Unauthorized access."
 msgstr ""
 
-#: build/index.js:340
-msgid "Overlaps the group with the precendent group by translating it on the Y axis. This control overwrites the margin top. It allows you to assign negative value to it. Note that the margin top will change the value to fit this one in pixels"
+#: inc/admin/class-admin-page.php:219
+msgid "Buffer processing completed successfully."
+msgstr ""
+
+#: inc/admin/class-admin-page.php:223
+msgid "Failed to process buffer."
+msgstr ""
+
+#: inc/admin/class-admin-page.php:254
+msgid "All stocks are already in the buffer."
+msgstr ""
+
+#: inc/admin/class-admin-page.php:265
+#, php-format
+msgid "Buffer updated successfully. Added %d stocks to buffer."
+msgstr ""
+
+#: inc/admin/class-admin-page.php:269
+msgid "Failed to update buffer."
+msgstr ""
+
+#: inc/admin/class-admin-page.php:282
+msgid "Batch size updated successfully."
+msgstr ""
+
+#: inc/admin/class-admin-page.php:342
+msgid "Stocks in Buffer:"
+msgstr ""
+
+#: inc/admin/class-admin-page.php:351
+msgid "Last Processing:"
+msgstr ""
+
+#: inc/admin/class-admin-page.php:352
+msgid "Next Processing:"
+msgstr ""
+
+#: inc/admin/class-admin-page.php:359
+msgid "Force Process Buffer"
+msgstr ""
+
+#: inc/admin/class-admin-page.php:368
+msgid "Update Buffer"
+msgstr ""
+
+#: inc/admin/class-admin-page.php:391
+msgid "API Information"
+msgstr ""
+
+#: inc/admin/class-admin-page.php:393
+msgid "CBOE API Endpoint:"
+msgstr ""
+
+#: inc/admin/class-admin-page.php:399
+msgid "This plugin fetches options data from the CBOE API. Replace \"LMT\" with any stock symbol to access data for that specific stock."
+msgstr ""
+
+#: inc/admin/class-admin-page.php:407
+msgid "Cron Job Settings"
+msgstr ""
+
+#: inc/admin/class-admin-page.php:412
+msgid "Update Frequency"
+msgstr ""
+
+#: inc/admin/class-admin-page.php:415
+#: inc/models/class-stock-ui.php:158
+msgid "Never"
+msgstr ""
+
+#: inc/admin/class-admin-page.php:416
+#: inc/cron/class-cron-job.php:54
+msgid "Every 15 minutes"
+msgstr ""
+
+#: inc/admin/class-admin-page.php:417
+#: inc/cron/class-cron-job.php:59
+msgid "Every 30 minutes"
+msgstr ""
+
+#: inc/admin/class-admin-page.php:418
+msgid "Hourly"
+msgstr ""
+
+#: inc/admin/class-admin-page.php:419
+msgid "Twice Daily"
+msgstr ""
+
+#: inc/admin/class-admin-page.php:420
+msgid "Daily"
+msgstr ""
+
+#: inc/admin/class-admin-page.php:425
+msgid "Update Schedule"
+msgstr ""
+
+#: inc/admin/class-admin-page.php:427
+msgid "Trigger Cron Manually"
+msgstr ""
+
+#: inc/admin/class-admin-page.php:430
+msgid "Cancel Next Cron"
+msgstr ""
+
+#: inc/admin/class-admin-page.php:435
+msgid "Current Status"
+msgstr ""
+
+#: inc/admin/class-admin-page.php:436
+msgid "Last Run:"
+msgstr ""
+
+#: inc/admin/class-admin-page.php:437
+msgid "Next Run:"
+msgstr ""
+
+#: inc/admin/class-admin-page.php:443
+msgid "Buffer Information"
+msgstr ""
+
+#: inc/admin/class-admin-page.php:452
+msgid "Stocks Management"
+msgstr ""
+
+#: inc/admin/class-admin-page.php:455
+#: inc/models/class-stock-cpt.php:44
+msgid "Add New Stock"
+msgstr ""
+
+#: inc/admin/class-admin-page.php:456
+msgid "Enter stock symbol (e.g., LMT)"
+msgstr ""
+
+#: inc/admin/class-admin-page.php:458
+msgid "Add Stock"
+msgstr ""
+
+#: inc/admin/class-admin-page.php:464
+msgid "Current Stocks"
+msgstr ""
+
+#: inc/admin/class-admin-page.php:466
+msgid "No stocks found."
+msgstr ""
+
+#: inc/admin/class-admin-page.php:471
+msgid "Symbol"
+msgstr ""
+
+#: inc/admin/class-admin-page.php:472
+#: inc/models/class-stock-ui.php:130
+msgid "Options Count"
+msgstr ""
+
+#: inc/admin/class-admin-page.php:473
+#: inc/models/class-stock-ui.php:131
+msgid "Last Sync"
+msgstr ""
+
+#: inc/admin/class-admin-page.php:474
+msgid "Actions"
+msgstr ""
+
+#: inc/admin/class-admin-page.php:485
+msgid "Edit"
+msgstr ""
+
+#: inc/admin/class-admin-page.php:493
+msgid "CBOE API"
+msgstr ""
+
+#: inc/admin/class-admin-page.php:502
+msgid "Puts API"
+msgstr ""
+
+#: inc/admin/class-admin-page.php:505
+msgid "Calls API"
+msgstr ""
+
+#: inc/admin/class-admin-page.php:518
+msgid "Task Buffer Manager"
+msgstr ""
+
+#: inc/admin/class-admin-page.php:523
+msgid "Processing Batch Size"
+msgstr ""
+
+#: inc/admin/class-admin-page.php:526
+msgid "Number of stocks to process in each batch (1-50)"
+msgstr ""
+
+#: inc/admin/class-admin-page.php:530
+msgid "Update Batch Size"
+msgstr ""
+
+#: inc/models/class-stock-cpt.php:40
+#: inc/models/class-stock-cpt.php:42
+msgid "Stocks"
+msgstr ""
+
+#: inc/models/class-stock-cpt.php:41
+msgid "Stock"
+msgstr ""
+
+#: inc/models/class-stock-cpt.php:43
+msgid "Add New"
+msgstr ""
+
+#: inc/models/class-stock-cpt.php:45
+msgid "Edit Stock"
+msgstr ""
+
+#: inc/models/class-stock-cpt.php:46
+msgid "New Stock"
+msgstr ""
+
+#: inc/models/class-stock-cpt.php:47
+msgid "View Stock"
+msgstr ""
+
+#: inc/models/class-stock-cpt.php:48
+msgid "Search Stocks"
+msgstr ""
+
+#: inc/models/class-stock-cpt.php:49
+msgid "No stocks found"
+msgstr ""
+
+#: inc/models/class-stock-cpt.php:50
+msgid "No stocks found in trash"
+msgstr ""
+
+#: inc/models/class-stock-ui.php:39
+msgid "Stock Options Information"
+msgstr ""
+
+#: inc/models/class-stock-ui.php:48
+msgid "Stock Options JSON"
+msgstr ""
+
+#: inc/models/class-stock-ui.php:74
+msgid "Total Options:"
+msgstr ""
+
+#: inc/models/class-stock-ui.php:79
+msgid "Last Updated:"
+msgstr ""
+
+#: inc/models/class-stock-ui.php:83
+msgid "Options data is automatically synced from CBOE API."
 msgstr ""
