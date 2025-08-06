@@ -84,7 +84,7 @@ class AdminPage {
 	/**
 	 * Add admin menu
 	 */
-public function add_admin_menu(): void {
+	public function add_admin_menu(): void {
 		add_submenu_page(
 			'edit.php?post_type=stock',
 			__( 'Coco Stock Options', 'coco-stock-options' ),
@@ -98,7 +98,7 @@ public function add_admin_menu(): void {
 	/**
 	 * Handle form submissions
 	 */
-public function handle_form_submissions(): void {
+	public function handle_form_submissions(): void {
 		// Handle force buffer action
 		if ( isset( $_POST['cocostock_action'] ) && 'force_buffer' === $_POST['cocostock_action'] ) {
 			$this->handle_force_buffer();
@@ -178,7 +178,7 @@ public function handle_form_submissions(): void {
 	/**
 	 * Handle cron schedule update
 	 */
-private function handle_cron_schedule_update(): void {
+	private function handle_cron_schedule_update(): void {
 		$schedule = sanitize_text_field( $_POST['cocostock_cron_schedule'] );
 		update_option( 'cocostock_cron_schedule', $schedule );
 
@@ -193,11 +193,11 @@ private function handle_cron_schedule_update(): void {
 		} );
 	}
 
-/**
- * Handle force buffer processing.
- * Wrapper for force _ process _ buffer, when clicked in the button
- */
-private function handle_force_buffer(): void {
+	/**
+	 * Handle force buffer processing.
+	 * Wrapper for force _ process _ buffer, when clicked in the button
+	 */
+	private function handle_force_buffer(): void {
 		if ( ! isset( $_POST['cocostock_force_buffer_nonce'] ) || ! wp_verify_nonce( $_POST['cocostock_force_buffer_nonce'], 'cocostock_force_buffer' ) ) {
 			add_action( 'admin_notices', function () {
 				echo '<div class="notice notice-error"><p>' . esc_html__( 'Security check failed.', 'coco-stock-options' ) . '</p></div>';
@@ -228,7 +228,7 @@ private function handle_force_buffer(): void {
 	/**
 	 * Handle update buffer action
 	 */
-private function handle_update_buffer(): void {
+	private function handle_update_buffer(): void {
 		if ( ! isset( $_POST['cocostock_update_buffer_nonce'] ) || ! wp_verify_nonce( $_POST['cocostock_update_buffer_nonce'], 'cocostock_update_buffer' ) ) {
 			add_action( 'admin_notices', function () {
 				echo '<div class="notice notice-error"><p>' . esc_html__( 'Security check failed.', 'coco-stock-options' ) . '</p></div>';
@@ -244,10 +244,10 @@ private function handle_update_buffer(): void {
 		}
 
 		// Get all stocks that are not in the buffer
-		$all_stocks = $this->buffer_manager->get_all_stocks_for_buffer();
+		$all_stocks              = $this->buffer_manager->get_all_stocks_for_buffer();
 		$current_buffer_contents = $this->buffer_manager->get_buffer_contents();
-		$current_buffer_symbols = array_column( $current_buffer_contents, 'symbol' );
-		$stocks_to_add = array_diff( $all_stocks, $current_buffer_symbols );
+		$current_buffer_symbols  = array_column( $current_buffer_contents, 'symbol' );
+		$stocks_to_add           = array_diff( $all_stocks, $current_buffer_symbols );
 
 		if ( empty( $stocks_to_add ) ) {
 			add_action( 'admin_notices', function () {
@@ -274,7 +274,7 @@ private function handle_update_buffer(): void {
 	/**
 	 * Handle batch size update
 	 */
-private function handle_batch_size_update(): void {
+	private function handle_batch_size_update(): void {
 		$batch_size = (int) $_POST['cocostock_batch_size'];
 		if ( $batch_size > 0 ) {
 			update_option( 'cocostock_batch_size', $batch_size );
@@ -287,7 +287,7 @@ private function handle_batch_size_update(): void {
 	/**
 	 * AJAX handler for adding stock
 	 */
-public function ajax_add_stock(): void {
+	public function ajax_add_stock(): void {
 		if ( empty( $_POST['nonce'] ) || ! wp_verify_nonce( $_POST['nonce'], 'cocostock_ajax_nonce' ) ) {
 			wp_send_json_error( 'Invalid or missing nonce: ' . $_POST['nonce'] );
 		}
@@ -333,7 +333,7 @@ public function ajax_add_stock(): void {
 	 *
 	 * @return string HTML content for buffer info section.
 	 */
-private function render_buffer_info_html(): string {
+	private function render_buffer_info_html(): string {
 		$buffer_info = $this->buffer_manager->get_buffer_info();
 
 		ob_start();
@@ -351,7 +351,7 @@ private function render_buffer_info_html(): string {
 		<p><strong><?php esc_html_e( 'Last Processing:', 'coco-stock-options' ); ?></strong> <?php echo esc_html( $buffer_info['last_processed'] ); ?></p>
 		<p><strong><?php esc_html_e( 'Next Processing:', 'coco-stock-options' ); ?></strong> <?php echo esc_html( $buffer_info['next_processing'] ); ?></p>
 
-		<?php if ( $buffer_info['count'] > 0 && ! $buffer_info['is_processing'] ) : ?>
+			<?php if ( $buffer_info['count'] > 0 && ! $buffer_info['is_processing'] ) : ?>
 			<form method="post" style="display: inline;">
 				<?php wp_nonce_field( 'cocostock_force_buffer', 'cocostock_force_buffer_nonce' ); ?>
 				<input type="hidden" name="cocostock_action" value="force_buffer" />
@@ -362,20 +362,20 @@ private function render_buffer_info_html(): string {
 		<?php endif; ?>
 
 		<form method="post" style="display: inline; margin-left: 10px;">
-			<?php wp_nonce_field( 'cocostock_update_buffer', 'cocostock_update_buffer_nonce' ); ?>
+				<?php wp_nonce_field( 'cocostock_update_buffer', 'cocostock_update_buffer_nonce' ); ?>
 			<input type="hidden" name="cocostock_action" value="update_buffer" />
 			<button type="submit" class="button button-secondary">
-				<?php esc_html_e( 'Update Buffer', 'coco-stock-options' ); ?>
+					<?php esc_html_e( 'Update Buffer', 'coco-stock-options' ); ?>
 			</button>
 		</form>
-		<?php
-		return ob_get_clean();
+			<?php
+			return ob_get_clean();
 	}
 
 	/**
 	 * Render admin page
 	 */
-public function render_admin_page(): void {
+	public function render_admin_page(): void {
 		$current_schedule = get_option( 'cocostock_cron_schedule', 'never' );
 		$batch_size       = get_option( 'cocostock_batch_size', 5 );
 		$stocks           = $this->stock_cpt->get_all_stocks();
@@ -494,8 +494,8 @@ public function render_admin_page(): void {
 												</a>
 												<?php
 												// Add REST API endpoint links for puts and calls
-												$site_url = get_site_url();
-												$puts_endpoint = $site_url . '/wp-json/coco/v1/puts/' . urlencode( $symbol );
+												$site_url       = get_site_url();
+												$puts_endpoint  = $site_url . '/wp-json/coco/v1/puts/' . urlencode( $symbol );
 												$calls_endpoint = $site_url . '/wp-json/coco/v1/calls/' . urlencode( $symbol );
 												?>
 												<a href="<?php echo esc_url( $puts_endpoint ); ?>" class="button button-small" target="_blank" rel="noopener noreferrer">
@@ -517,7 +517,7 @@ public function render_admin_page(): void {
 				<div class="cocostock-section">
 					<h2><?php esc_html_e( 'Task Buffer Manager', 'coco-stock-options' ); ?></h2>
 					<form method="post">
-						<?php wp_nonce_field( 'cocostock_admin_action', 'cocostock_nonce' ); ?>
+							<?php wp_nonce_field( 'cocostock_admin_action', 'cocostock_nonce' ); ?>
 						<table class="form-table">
 							<tr>
 								<th scope="row"><?php esc_html_e( 'Processing Batch Size', 'coco-stock-options' ); ?></th>
@@ -527,12 +527,12 @@ public function render_admin_page(): void {
 								</td>
 							</tr>
 						</table>
-						<?php submit_button( __( 'Update Batch Size', 'coco-stock-options' ) ); ?>
+							<?php submit_button( __( 'Update Batch Size', 'coco-stock-options' ) ); ?>
 					</form>
 				</div>
 			</div>
 		</div>
-		<?php
+			<?php
 	}
 
 	/**

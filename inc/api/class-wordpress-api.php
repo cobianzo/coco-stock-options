@@ -179,7 +179,7 @@ class WordPressApi {
 			$post_id,
 			$post_meta_key
 		);
-		if ($pp) {
+		if ( $pp ) {
 			return new \WP_REST_Response( $pp, 200 );
 		}
 
@@ -217,43 +217,43 @@ class WordPressApi {
 	 * @return \WP_REST_Response|\WP_Error Response object.
 	 */
 	private function get_specific_option( int $post_id, string $date, string $strike, ?string $field, string $type ): \WP_REST_Response|\WP_Error {
-    // Convert strike to the format used in meta key
-    $strike_formatted = $this->format_strike_for_meta_key( $strike );
-    if ( ! $strike_formatted ) {
-        return new \WP_Error(
-            'invalid_strike',
-            sprintf( 'Invalid strike price: %s', $strike ),
-            [ 'status' => 400 ]
-        );
-    }
+		// Convert strike to the format used in meta key
+		$strike_formatted = $this->format_strike_for_meta_key( $strike );
+		if ( ! $strike_formatted ) {
+			return new \WP_Error(
+				'invalid_strike',
+				sprintf( 'Invalid strike price: %s', $strike ),
+				[ 'status' => 400 ]
+			);
+		}
 
-    $meta_key = $date . $type . $strike_formatted;
-    $option_data = $this->stock_meta->get_stock_options( $post_id, $meta_key );
+		$meta_key    = $date . $type . $strike_formatted;
+		$option_data = $this->stock_meta->get_stock_options( $post_id, $meta_key );
 
 		$ticker = get_post_field( 'post_title', $post_id );
 
-    if ( ! $option_data ) {
-        return new \WP_Error(
-            'option_not_found',
-            sprintf( 'Option not found for date %s and strike %s', $date, $strike ),
-            [ 'status' => 404 ]
-        );
-    }
+		if ( ! $option_data ) {
+			return new \WP_Error(
+				'option_not_found',
+				sprintf( 'Option not found for date %s and strike %s', $date, $strike ),
+				[ 'status' => 404 ]
+			);
+		}
 
-    // If specific field requested, return only that field
-    if ( ! empty( $field ) ) {
-        if ( ! isset( $option_data[ $field ] ) ) {
-            return new \WP_Error(
-                'field_not_found',
-                sprintf( 'Field %s not found in option data', $field ),
-                [ 'status' => 400 ]
-            );
-        }
-        return new \WP_REST_Response( $option_data[ $field ], 200 );
-    }
+		// If specific field requested, return only that field
+		if ( ! empty( $field ) ) {
+			if ( ! isset( $option_data[ $field ] ) ) {
+				return new \WP_Error(
+					'field_not_found',
+					sprintf( 'Field %s not found in option data', $field ),
+					[ 'status' => 400 ]
+				);
+			}
+			return new \WP_REST_Response( $option_data[ $field ], 200 );
+		}
 
-    return new \WP_REST_Response( $option_data, 200 );
-}
+		return new \WP_REST_Response( $option_data, 200 );
+	}
 
 	/**
 	 * Format strike price for meta key
@@ -362,19 +362,19 @@ class WordPressApi {
 	public function get_api_documentation(): array {
 		return [
 			'endpoints'  => [
-				'get_all_puts'     => [
+				'get_all_puts'            => [
 					'url'         => '/wp-json/coco/v1/puts/{symbol}',
 					'method'      => 'GET',
 					'description' => 'Get all put options for a stock symbol',
 					'example'     => '/wp-json/coco/v1/puts/LMT',
 				],
-				'get_puts_by_date' => [
+				'get_puts_by_date'        => [
 					'url'         => '/wp-json/coco/v1/puts/{symbol}?date={date}',
 					'method'      => 'GET',
 					'description' => 'Get all put options for a stock on a specific date',
 					'example'     => '/wp-json/coco/v1/puts/LMT?date=250801',
 				],
-				'get_specific_put' => [
+				'get_specific_put'        => [
 					'url'         => '/wp-json/coco/v1/puts/{symbol}?date={date}&strike={strike}',
 					'method'      => 'GET',
 					'description' => 'Get a specific put option by date and strike',
@@ -386,25 +386,25 @@ class WordPressApi {
 					'description' => 'Get a specific field from a put option',
 					'example'     => '/wp-json/coco/v1/puts/LMT?date=250801&strike=310&field=bid',
 				],
-				'get_all_calls'     => [
+				'get_all_calls'           => [
 					'url'         => '/wp-json/coco/v1/calls/{symbol}',
 					'method'      => 'GET',
 					'description' => 'Get all call options for a stock symbol',
 					'example'     => '/wp-json/coco/v1/calls/LMT',
 				],
-				'get_calls_by_date' => [
+				'get_calls_by_date'       => [
 					'url'         => '/wp-json/coco/v1/calls/{symbol}?date={date}',
 					'method'      => 'GET',
 					'description' => 'Get all call options for a stock on a specific date',
 					'example'     => '/wp-json/coco/v1/calls/LMT?date=250801',
 				],
-				'get_specific_call' => [
+				'get_specific_call'       => [
 					'url'         => '/wp-json/coco/v1/calls/{symbol}?date={date}&strike={strike}',
 					'method'      => 'GET',
 					'description' => 'Get a specific call option by date and strike',
 					'example'     => '/wp-json/coco/v1/calls/LMT?date=250801&strike=310',
 				],
-				'get_specific_call_field'  => [
+				'get_specific_call_field' => [
 					'url'         => '/wp-json/coco/v1/calls/{symbol}?date={date}&strike={strike}&field={field}',
 					'method'      => 'GET',
 					'description' => 'Get a specific field from a call option',

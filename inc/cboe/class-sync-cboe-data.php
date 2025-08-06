@@ -208,7 +208,7 @@ class SyncCboeData {
 
 		$option = array_merge( [
 			'cboe_timestamp' => $cboe_timestamp,
-			'last_update'    => current_time('mysql'),
+			'last_update'    => current_time( 'mysql' ),
 		], $option );
 
 		$parsed = [
@@ -236,13 +236,14 @@ class SyncCboeData {
 		if ( ! $parsed_option ) {
 			return false;
 		}
-		//  [
-		// 	'stock_symbol' => 'BXMT'
-		// 	'date'         => '250815'
-		// 	'option_type'  => 'C'
-		// 	'strike_price' => '00011000'
+		// [
+		// 'stock_symbol' => 'BXMT'
+		// 'date'         => '250815'
+		// 'option_type'  => 'C'
+		// 'strike_price' => '00011000'
 		// ];
-		$meta_key = sprintf( '%s%s%s',
+		$meta_key = sprintf(
+			'%s%s%s',
 			$parsed_option['stock_symbol'],
 			$parsed_option['date'],
 			$parsed_option['option_type']

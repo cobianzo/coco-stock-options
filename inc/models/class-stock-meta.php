@@ -25,7 +25,7 @@ class Stock_Meta {
 	 */
 	public function get_stock_options_by_date( int $post_id, string $ticker, string $date, string $option_type ): array|false {
 		$meta_key = $this->build_meta_key( $ticker, $date, $option_type );
-		$data = get_post_meta( $post_id, $meta_key, true );
+		$data     = get_post_meta( $post_id, $meta_key, true );
 		return ! empty( $data ) ? $data : false;
 	}
 
@@ -59,7 +59,7 @@ class Stock_Meta {
 	 * @return bool|int Meta ID on success, false on failure.
 	 */
 	public function add_or_update_strike( int $post_id, string $ticker, string $date, string $option_type, string $strike, array $strike_data ): bool|int {
-		$meta_key = $this->build_meta_key( $ticker, $date, $option_type );
+		$meta_key     = $this->build_meta_key( $ticker, $date, $option_type );
 		$options_data = get_post_meta( $post_id, $meta_key, true );
 
 		if ( empty( $options_data ) ) {
@@ -81,7 +81,7 @@ class Stock_Meta {
 	 * @return bool True on success, false on failure.
 	 */
 	public function delete_strike( int $post_id, string $ticker, string $date, string $option_type, string $strike ): bool {
-		$meta_key = $this->build_meta_key( $ticker, $date, $option_type );
+		$meta_key     = $this->build_meta_key( $ticker, $date, $option_type );
 		$options_data = get_post_meta( $post_id, $meta_key, true );
 
 		if ( empty( $options_data ) || ! isset( $options_data[ $strike ] ) ) {
@@ -116,7 +116,7 @@ class Stock_Meta {
 	/**
 	 * Get all options meta keys for a stock
 	 *
-	 * @param int    $post_id Stock post ID.
+	 * @param int $post_id Stock post ID.
 	 * @return array Array of meta keys.
 	 */
 	public function get_stock_options_keys( int $post_id ): array {
@@ -209,7 +209,7 @@ class Stock_Meta {
 	 */
 	public function get_field_for_all_strikes( int $post_id, string $ticker, string $date, string $option_type, string $field ): array {
 		$options_data = $this->get_stock_options_by_date( $post_id, $ticker, $date, $option_type );
-		$result = [];
+		$result       = [];
 
 		if ( $options_data ) {
 			foreach ( $options_data as $strike => $strike_data ) {
@@ -248,7 +248,7 @@ class Stock_Meta {
 			$ticker = get_post_field( 'post_title', $post_id );
 			if ( $ticker ) {
 				$full_meta_key = $ticker . $meta_key;
-				$data = get_post_meta( $post_id, $full_meta_key, true );
+				$data          = get_post_meta( $post_id, $full_meta_key, true );
 				if ( ! empty( $data ) ) {
 					return $data;
 				}
@@ -258,17 +258,17 @@ class Stock_Meta {
 		// If the meta_key includes a strike price (e.g., '250815C00310000')
 		// Extract the date and option type, then try to get the data
 		if ( preg_match( '/^(\d{6})([CP])(\d{8})$/', $meta_key, $matches ) ) {
-			$date = $matches[1];
+			$date        = $matches[1];
 			$option_type = $matches[2];
-			$strike = $matches[3];
+			$strike      = $matches[3];
 			
 			$ticker = get_post_field( 'post_title', $post_id );
 			if ( $ticker ) {
 				$full_meta_key = $ticker . $date . $option_type;
-				$data = get_post_meta( $post_id, $full_meta_key, true );
-				if ( ! empty( $data ) && isset( $data[$strike] ) ) {
+				$data          = get_post_meta( $post_id, $full_meta_key, true );
+				if ( ! empty( $data ) && isset( $data[ $strike ] ) ) {
 					// Return just the specific strike data if requested
-					return $data[$strike];
+					return $data[ $strike ];
 				} elseif ( ! empty( $data ) ) {
 					// Return all strikes if the specific one wasn't found
 					return $data;

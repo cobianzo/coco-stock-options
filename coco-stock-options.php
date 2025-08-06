@@ -66,10 +66,12 @@ coco_mp_init();
  * @param mixed $var Variable to dump
  * @return void
  */
-function dd( mixed $var ): void {
-	echo '<pre>';
-	var_dump( $var );
-	echo '</pre>';
+if ( ! function_exists( 'dd' ) ) {
+	function dd( mixed $var ): void {
+		echo '<pre>';
+		var_dump( $var );
+		echo '</pre>';
+	}
 }
 
 /**
@@ -78,8 +80,10 @@ function dd( mixed $var ): void {
  * @param mixed $var Variable to dump
  * @return void
  */
-function ddie( mixed $var = '' ): void {
-	dd( $var );
-	wp_die();
+if ( ! function_exists( 'ddie' ) ) {
+	function ddie( mixed $var = '' ): void {
+		dd( $var );
+		wp_die();
+	}
 }
 // phpcs:enable
