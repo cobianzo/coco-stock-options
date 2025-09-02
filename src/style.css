@@ -1,6 +1,8 @@
-/* Add any custom styles here. */
-.wp-block-coco-stock-options-example-block {
-  background-color: #f0f0f0;
-  padding: 1rem;
-  border: 1px solid #ccc;
+/*
+  Generic styles of this plugin for all the frontend
+  (not associated to any block in particular).
+  Compiles into build/style-index.css
+*/
+body {
+  border: 5px solid red;
 }

@@ -168,16 +168,16 @@
     .stock-options-table {
         font-size: 0.75rem;
     }
-    
+
     .stock-options-table th,
     .stock-options-table td {
         padding: 0.5rem 0.25rem;
     }
-    
+
     .summary-stats {
         grid-template-columns: 1fr;
     }
-    
+
     .wp-block-coco-stock-options-example-block {
         padding: 1rem;
     }
