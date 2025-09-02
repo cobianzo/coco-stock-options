@@ -1,3 +1,14 @@
+COCO STOCK OPTIONS
+===
+
+This plugin defines Custom Post Types (CPT) for tracking required stocks. It scans for future options values for each stock from the CBOE API (`https://cdn.cboe.com/api/global/delayed_quotes/options/<stock-symbol>.json`) via a cron job. The results are formatted and saved as post meta, then exposed through a custom REST API endpoint.
+
+Example endpoints
+
+/wp-json/coco/v1/puts/LMT?date=250808&strike=00447500&field=bid
+
+
+
 TODO
 ===
 
@@ -11,13 +22,59 @@ Anadir phpunit tests
 Cache all the cacheable things.
 Las fechas de los cron jobs no cuadra. El main cron job esta siempre programado para AHORA
 
-WHAT IS THIS PROJECT
-===
-
-This plugin defines Custom Post Types (CPT) for tracking required stocks. It scans for future options values for each stock from the CBOE API (`https://cdn.cboe.com/api/global/delayed_quotes/options/<stock-symbol>.json`) via a cron job. The results are formatted and saved as post meta, then exposed through a custom REST API endpoint, for example: `wp-json/coco/puts/lmt?date=250815&strike=00350000`.
 
 HOW IT WORKS
 ===
+
+El proceso se inicia a través de un cron job que, en lugar de actualizar todos los stocks a la vez, utiliza un sistema de "buffer" para procesarlos por lotes.
+
+  Aquí tienes el flujo detallado:
+
+  Flujo de Actualización de Stock
+
+
+   1. Inicio del Cron Job (`CronJob::update_buffer_callback`)
+       * Clase: \CocoStockOptions\Cron\CronJob
+       * Fichero: inc/cron/class-cron-job.php
+       * Método: update_buffer_callback()
+       * Descripción: Un "cron job" de WordPress (cocostock_update_buffer) ejecuta este método. Su única responsabilidad es llamar al gestor del
+         buffer para que procese el siguiente lote de stocks.
+
+
+   2. Procesamiento del Buffer (`BufferManager::process_buffer`)
+       * Clase: \CocoStockOptions\Cron\BufferManager
+       * Fichero: inc/cron/class-buffer-manager.php
+       * Método: process_buffer()
+       * Descripción: Este método coge un lote de stocks del buffer (el número de stocks por lote se define en las opciones del plugin). Por cada
+         stock del lote (por ejemplo, "LMT"), llama al sincronizador de datos.
+
+
+   3. Sincronización de Datos (`SyncCboeData::sync_stock`)
+       * Clase: \CocoStockOptions\Cboe\SyncCboeData
+       * Fichero: inc/cboe/class-sync-cboe-data.php
+       * Método: sync_stock( string $symbol )
+       * Descripción: Este es el núcleo del proceso para un stock individual.
+           1. Llama a la conexión con CBOE para obtener los datos nuevos para el símbolo del stock ("LMT").
+           2. Si la obtención de datos es exitosa, llama al gestor de metadatos para guardar la información.
+
+
+   4. Conexión con la API de CBOE (`CboeConnection::get_options_data`)
+       * Clase: \CocoStockOptions\Cboe\CboeConnection
+       * Fichero: inc/cboe/class-cboe-connection.php
+       * Método: get_options_data( string $symbol )
+       * Descripción: Este método construye la URL de la API de CBOE (ej: https://cdn.cboe.com/api/global/delayed_quotes/options/LMT.json) y realiza la petición HTTP para obtener los datos en formato JSON. Devuelve los datos decodificados.
+
+
+   5. Guardado de Metadatos (`Stock_Meta::save_options_data`)
+       * Clase: \CocoStockOptions\Models\Stock_Meta
+       * Fichero: inc/models/class-stock-meta.php
+       * Método: save_options_data( int $post_id, array $options_data )
+       * Descripción: Una vez que SyncCboeData ha obtenido los datos, llama a este método. Se encarga de guardar los datos de las opciones (puts
+         y calls) como metadatos del post asociado al stock "LMT", utilizando la función update_post_meta() de WordPress.
+
+
+  En resumen, para actualizar el stock "LMT", el Cron Job inicia el Buffer Manager, que a su vez le pide al Sync Cboe Data que sincronice
+  "LMT". Este último usa la Cboe Connection para traer los datos y el Stock Meta para guardarlos en la base de datos.
 
 
 DEVELOPMENT

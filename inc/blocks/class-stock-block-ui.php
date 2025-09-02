@@ -5,12 +5,12 @@
  * @package CocoStockOptions
  */
 
-namespace CocoStockOptions\Models;
+namespace CocoStockOptions\Blocks;
 
 /**
  * Stock UI class for handling UI elements
  */
-class Stock_UI {
+class Stock_Block_UI {
 
 	/**
 	 * Helper function to get stock options data

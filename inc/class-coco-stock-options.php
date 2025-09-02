@@ -18,7 +18,7 @@ use CocoStockOptions\Cron\CronJob;
 use CocoStockOptions\Cron\GarbageCleaner;
 use CocoStockOptions\Models\Stock_CPT;
 use CocoStockOptions\Models\Stock_Meta;
-use CocoStockOptions\Models\Stock_UI;
+use CocoStockOptions\Blocks\Stock_Block_UI;
 
 /**
  * Main plugin class
@@ -101,11 +101,11 @@ class CocoStockOptions {
 	private Admin_UI $admin_ui;
 
 	/**
-	 * Stock UI instance
+	 * Stock Block UI instance
 	 *
-	 * @var Stock_UI
+	 * @var Stock_Block_UI
 	 */
-	private Stock_UI $stock_ui;
+	private Stock_Block_UI $stock_ui;
 
 	/**
 	 * WordPress API instance
@@ -148,7 +148,7 @@ class CocoStockOptions {
 		$this->cron_job        = new CronJob( $this->buffer_manager );
 		$this->admin_page      = new AdminPage( $this->stock_cpt, $this->stock_meta, $this->cboe_connection, $this->buffer_manager, $this->cron_job );
 		$this->admin_ui        = new Admin_UI();
-		$this->stock_ui        = new Stock_UI();
+		$this->stock_ui        = new Stock_Block_UI();
 		$this->wordpress_api   = new WordPressApi( $this->stock_cpt, $this->stock_meta );
 	}
 

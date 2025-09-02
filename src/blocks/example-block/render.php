@@ -10,7 +10,7 @@
  * @var WP_Block $block      Block instance
  */
 
-use CocoStockOptions\Models\Stock_UI;
+use CocoStockOptions\Blocks\Stock_Block_UI as Stock_UI;
 
 // Prevent direct access
 if ( ! defined( 'ABSPATH' ) ) {
