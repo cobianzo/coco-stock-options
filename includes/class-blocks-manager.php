@@ -91,16 +91,10 @@ class BlocksManager {
      * @return void
      */
     private function register_single_block( string $block_name ): void {
-        $block_json_path = COCO_STOCK_OPTIONS_DIR . "src/blocks/{$block_name}/block.json";
+        $block_json_path = COCO_STOCK_OPTIONS_DIR . "build/blocks/{$block_name}";
         
         if ( ! file_exists( $block_json_path ) ) {
             return;
-        }
-
-        // Include block's PHP file if exists
-        $block_php_path = COCO_STOCK_OPTIONS_DIR . "src/blocks/{$block_name}/index.php";
-        if ( file_exists( $block_php_path ) ) {
-            include_once $block_php_path;
         }
 
         // Register block from metadata
@@ -113,41 +107,8 @@ class BlocksManager {
      * @return void
      */
     public function enqueue_block_editor_assets(): void {
-        $asset_file = COCO_STOCK_OPTIONS_BUILD_DIR . 'index.asset.php';
-        
-        if ( ! file_exists( $asset_file ) ) {
-            return;
-        }
-
-        $asset = include $asset_file;
-
-        wp_enqueue_script(
-            'coco-stock-options-blocks',
-            COCO_STOCK_OPTIONS_BUILD_URL . 'index.js',
-            $asset['dependencies'],
-            $asset['version'],
-            array( 'in_footer' => true )
-        );
-
-        wp_enqueue_style(
-            'coco-stock-options-blocks-editor',
-            COCO_STOCK_OPTIONS_BUILD_URL . 'index.css',
-            array( 'wp-edit-blocks' ),
-            $asset['version']
-        );
-
-        // Localize script for AJAX and other data
-        wp_localize_script(
-            'coco-stock-options-blocks',
-            'cocoStockOptionsData',
-            array(
-                'ajaxUrl'     => admin_url( 'admin-ajax.php' ),
-                'nonce'       => wp_create_nonce( 'coco_stock_options_nonce' ),
-                'pluginUrl'   => COCO_STOCK_OPTIONS_URL,
-                'apiEndpoint' => home_url( '/wp-json/coco/v1/' ),
-                'isEditor'    => true,
-            )
-        );
+        // The `editorScript` property in block.json handles enqueuing editor assets.
+        // This function can be used to enqueue additional assets for the editor.
     }
 
     /**
@@ -176,26 +137,17 @@ class BlocksManager {
             $asset['version']
         );
 
-        // Enqueue frontend JS if needed for interactivity
-        wp_enqueue_script(
-            'coco-stock-options-frontend',
-            COCO_STOCK_OPTIONS_BUILD_URL . 'frontend.js',
-            array(),
-            $asset['version'],
-            array( 'in_footer' => true )
-        );
-
-        // Localize frontend script
-        wp_localize_script(
-            'coco-stock-options-frontend',
-            'cocoStockOptionsData',
-            array(
-                'ajaxUrl'     => admin_url( 'admin-ajax.php' ),
-                'nonce'       => wp_create_nonce( 'coco_stock_options_nonce' ),
-                'apiEndpoint' => home_url( '/wp-json/coco/v1/' ),
-                'isEditor'    => false,
-            )
-        );
+        // Localize the option-analyzer block script
+        if ( has_block( 'coco-stock-options/option-analyzer' ) ) {
+            wp_localize_script(
+                'coco-stock-options-option-analyzer-view-script',
+                'optionAnalyzerData',
+                [
+                    'symbol' => 'AAPL',
+                    'someValue' => 123,
+                ]
+            );
+        }
     }
 
     /**

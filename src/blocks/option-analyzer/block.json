@@ -1,0 +1,18 @@
+{
+    "$schema": "https://schemas.wp.org/trunk/block.json",
+    "apiVersion": 3,
+    "name": "coco-stock-options/option-analyzer",
+    "version": "0.1.0",
+    "title": "Option Analyzer",
+    "category": "widgets",
+    "icon": "analytics",
+    "description": "A block to display an analysis of stock options.",
+    "supports": {
+        "html": false
+    },
+    "textdomain": "coco-stock-options",
+    "editorScript": "file:./index.js",
+    "editorStyle": "file:./editor.css",
+    "style": "file:./style.css",
+    "viewScript": "file:./frontend.js"
+}

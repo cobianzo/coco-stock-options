@@ -9,8 +9,7 @@ import './admin';
 import './style.css';
 
 
-// Import block functionality
-import './blocks/example-block';
+
 
 // Import utilities
 import * as utils from './utils';
