@@ -18,32 +18,32 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // Get block attributes with defaults
-$stock_symbol = $attributes['stockSymbol'] ?? 'AAPL';
-$display_type = $attributes['displayType'] ?? 'table';
-$max_results = $attributes['maxResults'] ?? 10;
-$show_header = $attributes['showHeader'] ?? true;
+$stock_symbol     = $attributes['stockSymbol'] ?? 'AAPL';
+$display_type     = $attributes['displayType'] ?? 'table';
+$max_results      = $attributes['maxResults'] ?? 10;
+$show_header      = $attributes['showHeader'] ?? true;
 $background_color = $attributes['backgroundColor'] ?? '#ffffff';
-$text_color = $attributes['textColor'] ?? '#333333';
+$text_color       = $attributes['textColor'] ?? '#333333';
 
 // Get unique ID for this block instance
 $unique_id = 'stock-options-block-' . uniqid();
 
 // Build CSS classes
-$wrapper_classes = array(
+$wrapper_classes = [
 	'wp-block-coco-stock-options-example-block',
 	'stock-options-display',
-	"display-type-{$display_type}"
-);
+	"display-type-{$display_type}",
+];
 
 if ( ! empty( $attributes['className'] ) ) {
 	$wrapper_classes[] = $attributes['className'];
 }
 
 // Inline styles
-$wrapper_styles = array(
+$wrapper_styles = [
 	"background-color: {$background_color}",
-	"color: {$text_color}"
-);
+	"color: {$text_color}",
+];
 
 // Try to get stock data (this would connect to your existing API)
 $stock_data = Stock_UI::get_stock_options_data( $stock_symbol, $max_results );

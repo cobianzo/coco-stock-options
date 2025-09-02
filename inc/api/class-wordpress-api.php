@@ -17,6 +17,20 @@ use CocoStockOptions\Models\Stock_Meta;
 class WordPressApi {
 
 	/**
+	 * Validator for API parameters
+	 *
+	 * @var ApiParameterValidator
+	 */
+	private ApiParameterValidator $validator;
+
+	/**
+	 * Helper for options data manipulation
+	 *
+	 * @var OptionsDataHelper
+	 */
+	private OptionsDataHelper $data_helper;
+
+	/**
 	 * Stock CPT instance
 	 *
 	 * @var Stock_CPT
@@ -33,12 +47,16 @@ class WordPressApi {
 	/**
 	 * Initialize the WordPress API
 	 *
-	 * @param Stock_CPT  $stock_cpt  Stock CPT instance.
-	 * @param Stock_Meta $stock_meta Stock Meta instance.
+	 * @param Stock_CPT             $stock_cpt   Stock CPT instance.
+	 * @param Stock_Meta            $stock_meta  Stock Meta instance.
+	 * @param ApiParameterValidator $validator  API parameter validator.
+	 * @param OptionsDataHelper     $data_helper Options data helper.
 	 */
-	public function __construct( Stock_CPT $stock_cpt, Stock_Meta $stock_meta ) {
-		$this->stock_cpt  = $stock_cpt;
-		$this->stock_meta = $stock_meta;
+	public function __construct( Stock_CPT $stock_cpt, Stock_Meta $stock_meta, ApiParameterValidator $validator, OptionsDataHelper $data_helper ) {
+		$this->stock_cpt   = $stock_cpt;
+		$this->stock_meta  = $stock_meta;
+		$this->validator   = $validator;
+		$this->data_helper = $data_helper;
 		$this->init_hooks();
 	}
 
@@ -58,19 +76,19 @@ class WordPressApi {
 		$args = [
 			'symbol' => [
 				'required'          => true,
-				'validate_callback' => [ $this, 'validate_symbol' ],
+				'validate_callback' => [ $this->validator, 'validate_symbol' ],
 			],
 			'date'   => [
 				'required'          => false,
-				'validate_callback' => [ $this, 'validate_date' ],
+				'validate_callback' => [ $this->validator, 'validate_date' ],
 			],
 			'strike' => [
 				'required'          => false,
-				'validate_callback' => [ $this, 'validate_strike' ],
+				'validate_callback' => [ $this->validator, 'validate_strike' ],
 			],
 			'field'  => [
 				'required'          => false,
-				'validate_callback' => [ $this, 'validate_field' ],
+				'validate_callback' => [ $this->validator, 'validate_field' ],
 			],
 		];
 
@@ -97,11 +115,14 @@ class WordPressApi {
 				'callback'            => [ $this, 'get_stock_options_by_id' ],
 				'permission_callback' => '__return_true', // Adjust permissions as needed
 				'args'                => [
-					'type' => [
-						'validate_callback' => function( $param, $request, $key ) {
-							return in_array( strtolower( $param ), [ 'put', 'call' ], true );
-						},
+					'type'          => [
+						'validate_callback' => [ $this->validator, 'validate_option_type' ],
 						'required'          => false,
+					],
+					'exclude_bid_0' => [
+						'validate_callback' => [ $this->validator, 'validate_exclude_bid_0' ],
+						'required'          => false,
+						'default'           => false,
 					],
 				],
 			]
@@ -115,8 +136,12 @@ class WordPressApi {
 	 * @return \WP_REST_Response|\WP_Error Response object.
 	 */
 	public function get_stock_options_by_id( \WP_REST_Request $request ): \WP_REST_Response|\WP_Error {
-		$id   = (int) $request['id'];
-		$type = strtolower( $request->get_param( 'type' ) );
+		$id            = (int) $request['id'];
+		$type          = strtolower( $request->get_param( 'type' ) );
+		$exclude_bid_0 = $request->get_param( 'exclude_bid_0' );
+
+		// Convert exclude_bid_0 to boolean
+		$exclude_bid_0 = $this->validator->sanitize_boolean_param( $exclude_bid_0 );
 
 		$options_data = [];
 
@@ -132,6 +157,12 @@ class WordPressApi {
 		if ( empty( $options_data ) ) {
 			return new \WP_REST_Response( [ 'message' => 'No options data found for this stock ID' ], 404 );
 		}
+
+		// Apply bid filtering if requested
+		if ( $exclude_bid_0 ) {
+			$options_data = $this->data_helper->filter_options_by_bid( $options_data );
+		}
+
 		return new \WP_REST_Response( $options_data, 200 );
 	}
 
@@ -195,7 +226,8 @@ class WordPressApi {
 	/**
 	 * Get all options for a stock
 	 *
-	 * @param int $post_id Stock post ID.
+	 * @param int    $post_id Stock post ID.
+	 * @param string $type    Option type (P or C).
 	 * @return \WP_REST_Response Response object.
 	 */
 	private function get_all_options_for_stock( int $post_id, string $type ): \WP_REST_Response {
@@ -215,7 +247,8 @@ class WordPressApi {
 	 * Get options for a specific date
 	 *
 	 * @param int    $post_id Stock post ID.
-	 * @param string $date Date in format YYMMDD.
+	 * @param string $date    Date in format YYMMDD.
+	 * @param string $type    Option type (P or C).
 	 * @return \WP_REST_Response|\WP_Error Response object.
 	 */
 	private function get_options_for_date( int $post_id, string $date, string $type ): \WP_REST_Response|\WP_Error {
@@ -256,15 +289,16 @@ class WordPressApi {
 	/**
 	 * Get specific option by date and strike
 	 *
-	 * @param int    $post_id Stock post ID.
-	 * @param string $date Date in format YYMMDD.
-	 * @param string $strike Strike price.
-	 * @param string $field Specific field to return.
+	 * @param int     $post_id Stock post ID.
+	 * @param string  $date    Date in format YYMMDD.
+	 * @param string  $strike  Strike price.
+	 * @param ?string $field   Specific field to return.
+	 * @param string  $type    Option type (P or C).
 	 * @return \WP_REST_Response|\WP_Error Response object.
 	 */
 	private function get_specific_option( int $post_id, string $date, string $strike, ?string $field, string $type ): \WP_REST_Response|\WP_Error {
 		// Convert strike to the format used in meta key
-		$strike_formatted = $this->format_strike_for_meta_key( $strike );
+		$strike_formatted = $this->data_helper->format_strike_for_meta_key( $strike );
 		if ( ! $strike_formatted ) {
 			return new \WP_Error(
 				'invalid_strike',
@@ -299,105 +333,6 @@ class WordPressApi {
 		}
 
 		return new \WP_REST_Response( $option_data, 200 );
-	}
-
-	/**
-	 * Format strike price for meta key
-	 * TODO: still doesnt work ok, we need the decimals of the ticker for this.
-	 *
-	 * @param string $strike Strike price.
-	 * @return string|false Formatted strike or false on failure.
-	 */
-	private function format_strike_for_meta_key( string $strike ): string|false {
-		// Validate strike is numeric
-		if ( ! is_numeric( $strike ) ) {
-			return false;
-		}
-
-		return (string) $strike;
-		// // Format as 8-digit number (e.g., 310.00 -> 00310000)
-		// return sprintf( '%08d', (int) ( $strike_float * 100 ) );
-	}
-
-	/**
-	 * Validate symbol parameter
-	 *
-	 * @param string $symbol Stock symbol.
-	 * @return bool True if valid, false otherwise.
-	 */
-	public function validate_symbol( string $symbol ): bool {
-		return ! empty( $symbol ) && preg_match( '/^[A-Za-z]+$/', $symbol );
-	}
-
-	/**
-	 * Validate date parameter
-	 *
-	 * @param string $date Date in format YYMMDD.
-	 * @return bool True if valid, false otherwise.
-	 */
-	public function validate_date( string $date ): bool {
-		if ( empty( $date ) ) {
-			return true; // Optional parameter
-		}
-
-		return preg_match( '/^\d{6}$/', $date );
-	}
-
-	/**
-	 * Validate strike parameter
-	 *
-	 * @param string $strike Strike price.
-	 * @return bool True if valid, false otherwise.
-	 */
-	public function validate_strike( string $strike ): bool {
-		if ( empty( $strike ) ) {
-			return true; // Optional parameter
-		}
-
-		return is_numeric( $strike ) && (float) $strike > 0;
-	}
-
-	/**
-	 * Validate field parameter
-	 *
-	 * @param string $field Field name.
-	 * @return bool True if valid, false otherwise.
-	 */
-	public function validate_field( string $field ): bool {
-		if ( empty( $field ) ) {
-			return true; // Optional parameter
-		}
-
-		$valid_fields = [
-			'last_update',
-			'cboe_timestamp',
-			'date',
-			'option',
-			'bid',
-			'bid_size',
-			'ask',
-			'ask_size',
-			'iv',
-			'open_interest',
-			'volume',
-			'delta',
-			'gamma',
-			'vega',
-			'theta',
-			'rho',
-			'theo',
-			'change',
-			'open',
-			'high',
-			'low',
-			'tick',
-			'last_trade_price',
-			'last_trade_time',
-			'percent_change',
-			'prev_day_close',
-		];
-
-		return in_array( $field, $valid_fields, true );
 	}
 
 	/**

@@ -68,7 +68,7 @@ class Stock_CPT {
 		$all_meta = get_post_meta( $post->ID );
 
 		// Filter out internal WordPress meta keys
-		$filtered_meta = array_filter( $all_meta, function( $key ) {
+		$filtered_meta = array_filter( $all_meta, function ( $key ) {
 			return ! str_starts_with( $key, '_' );
 		}, ARRAY_FILTER_USE_KEY );
 

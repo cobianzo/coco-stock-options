@@ -29,28 +29,28 @@ class Stock_Block_UI {
 		}
 
 		// Sample data structure - replace with actual API call
-		return array(
-			'symbol' => strtoupper( $symbol ),
-			'options' => array(
-				array(
-					'strike' => '150.00',
-					'type' => 'call',
+		return [
+			'symbol'        => strtoupper( $symbol ),
+			'options'       => [
+				[
+					'strike'  => '150.00',
+					'type'    => 'call',
 					'premium' => '2.50',
-					'expiry' => '2024-12-20',
-					'volume' => 1250
-				),
-				array(
-					'strike' => '145.00',
-					'type' => 'put',
+					'expiry'  => '2024-12-20',
+					'volume'  => 1250,
+				],
+				[
+					'strike'  => '145.00',
+					'type'    => 'put',
 					'premium' => '1.75',
-					'expiry' => '2024-12-20',
-					'volume' => 890
-				),
+					'expiry'  => '2024-12-20',
+					'volume'  => 890,
+				],
 				// More sample data...
-			),
-			'last_updated' => current_time( 'timestamp' ),
-			'total_results' => 25
-		);
+			],
+			'last_updated'  => current_time( 'timestamp' ),
+			'total_results' => 25,
+		];
 	}
 
 	/**
@@ -118,8 +118,8 @@ class Stock_Block_UI {
 			return;
 		}
 
-		$total_calls = count( array_filter( $data['options'], fn( $opt ) => $opt['type'] === 'call' ) );
-		$total_puts = count( array_filter( $data['options'], fn( $opt ) => $opt['type'] === 'put' ) );
+		$total_calls  = count( array_filter( $data['options'], fn( $opt ) => $opt['type'] === 'call' ) );
+		$total_puts   = count( array_filter( $data['options'], fn( $opt ) => $opt['type'] === 'put' ) );
 		$total_volume = array_sum( array_column( $data['options'], 'volume' ) );
 		?>
 		<div class="stock-summary">

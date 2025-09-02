@@ -42,6 +42,8 @@ function coco_mp_init(): void {
 	require_once COCO_STOCK_OPTIONS_DIR . 'inc/admin/class-admin-enqueue.php';
 	require_once COCO_STOCK_OPTIONS_DIR . 'inc/admin/class-admin-page.php';
 	require_once COCO_STOCK_OPTIONS_DIR . 'inc/admin/class-admin-ui.php';
+	require_once COCO_STOCK_OPTIONS_DIR . 'inc/api/class-api-parameter-validator.php';
+	require_once COCO_STOCK_OPTIONS_DIR . 'inc/api/class-options-data-helper.php';
 	require_once COCO_STOCK_OPTIONS_DIR . 'inc/api/class-wordpress-api.php';
 	require_once COCO_STOCK_OPTIONS_DIR . 'inc/cboe/class-cboe-connection.php';
 	require_once COCO_STOCK_OPTIONS_DIR . 'inc/cboe/class-sync-cboe-data.php';

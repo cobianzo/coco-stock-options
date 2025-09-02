@@ -11,6 +11,8 @@ namespace CocoStockOptions;
 use CocoStockOptions\Admin\AdminPage;
 use CocoStockOptions\Admin\Admin_UI;
 use CocoStockOptions\Api\WordPressApi;
+use CocoStockOptions\Api\ApiParameterValidator;
+use CocoStockOptions\Api\OptionsDataHelper;
 use CocoStockOptions\Cboe\CboeConnection;
 use CocoStockOptions\Cboe\SyncCboeData;
 use CocoStockOptions\Cron\BufferManager;
@@ -149,7 +151,10 @@ class CocoStockOptions {
 		$this->admin_page      = new AdminPage( $this->stock_cpt, $this->stock_meta, $this->cboe_connection, $this->buffer_manager, $this->cron_job );
 		$this->admin_ui        = new Admin_UI();
 		$this->stock_ui        = new Stock_Block_UI();
-		$this->wordpress_api   = new WordPressApi( $this->stock_cpt, $this->stock_meta );
+		// API dependencies following SOLID (SRP)
+		$api_validator       = new ApiParameterValidator();
+		$data_helper         = new OptionsDataHelper();
+		$this->wordpress_api = new WordPressApi( $this->stock_cpt, $this->stock_meta, $api_validator, $data_helper );
 	}
 
 	/**
