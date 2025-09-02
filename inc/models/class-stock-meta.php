@@ -149,7 +149,7 @@ class Stock_Meta {
 			if ( strpos( $meta_key, $ticker ) !== 0 ) {
 				continue;
 			}
-			
+
 			$options_data = get_post_meta( $post_id, $meta_key, true );
 			if ( ! empty( $options_data ) ) {
 				// Check each strike for the latest timestamp
@@ -197,85 +197,44 @@ class Stock_Meta {
 		return false;
 	}
 
-	/**
-	 * Get all options data for a specific field across all strikes
-	 *
-	 * @param int    $post_id Stock post ID.
-	 * @param string $ticker Stock ticker symbol (e.g., 'LMT').
-	 * @param string $date Date in format YYMMDD (e.g., '250815').
-	 * @param string $option_type Option type ('C' for Call, 'P' for Put).
-	 * @param string $field Field name to extract (e.g., 'bid', 'ask').
-	 * @return array Associative array with strike as key and field value as value.
-	 */
-	public function get_field_for_all_strikes( int $post_id, string $ticker, string $date, string $option_type, string $field ): array {
-		$options_data = $this->get_stock_options_by_date( $post_id, $ticker, $date, $option_type );
-		$result       = [];
 
-		if ( $options_data ) {
-			foreach ( $options_data as $strike => $strike_data ) {
-				if ( isset( $strike_data[ $field ] ) ) {
-					$result[ $strike ] = $strike_data[ $field ];
-				}
+	/**
+	 * Get all PUTS meta data for a stock
+	 *
+	 * @param int $post_id Stock post ID.
+	 * @return array Array of PUTS meta data.
+	 */
+	public function get_all_puts_meta( int $post_id ): array {
+		$all_meta_keys = $this->get_stock_options_keys( $post_id );
+		$puts_data     = [];
+
+		foreach ( $all_meta_keys as $meta_key ) {
+			$parsed_key = $this->parse_meta_key( $meta_key );
+			if ( $parsed_key && 'P' === $parsed_key['option_type'] ) {
+				$puts_data[ $meta_key ] = get_post_meta( $post_id, $meta_key, true );
 			}
 		}
 
-		return $result;
+		return $puts_data;
 	}
 
 	/**
-	 * Get stock options data from post meta
+	 * Get all CALLS meta data for a stock
 	 *
-	 * This method is provided for backward compatibility with other parts of the codebase
-	 * that might be expecting the old method signature.
-	 *
-	 * @param int    $post_id Stock post ID.
-	 * @param string $meta_key Meta key. This could be in various formats depending on the caller:
-	 *                         - Full meta key (e.g., 'LMT250815C')
-	 *                         - Date + option type (e.g., '250815C')
-	 *                         - Date + option type + strike (e.g., '250815C00310000')
-	 * @return array|false Options data array or false if not found.
+	 * @param int $post_id Stock post ID.
+	 * @return array Array of CALLS meta data.
 	 */
-	public function get_stock_options( int $post_id, string $meta_key ): array|false {
-		// Get the data directly if it's a full meta key
-		$data = get_post_meta( $post_id, $meta_key, true );
-		if ( ! empty( $data ) ) {
-			return $data;
-		}
+	public function get_all_calls_meta( int $post_id ): array {
+		$all_meta_keys = $this->get_stock_options_keys( $post_id );
+		$calls_data    = [];
 
-		// If the meta_key is in format 'YYMMDDX' (date + option type)
-		// Try to get the ticker from the post and build the full meta key
-		if ( preg_match( '/^\d{6}[CP]$/', $meta_key ) ) {
-			$ticker = get_post_field( 'post_title', $post_id );
-			if ( $ticker ) {
-				$full_meta_key = $ticker . $meta_key;
-				$data          = get_post_meta( $post_id, $full_meta_key, true );
-				if ( ! empty( $data ) ) {
-					return $data;
-				}
+		foreach ( $all_meta_keys as $meta_key ) {
+			$parsed_key = $this->parse_meta_key( $meta_key );
+			if ( $parsed_key && 'C' === $parsed_key['option_type'] ) {
+				$calls_data[ $meta_key ] = get_post_meta( $post_id, $meta_key, true );
 			}
 		}
 
-		// If the meta_key includes a strike price (e.g., '250815C00310000')
-		// Extract the date and option type, then try to get the data
-		if ( preg_match( '/^(\d{6})([CP])(\d{8})$/', $meta_key, $matches ) ) {
-			$date        = $matches[1];
-			$option_type = $matches[2];
-			$strike      = $matches[3];
-			
-			$ticker = get_post_field( 'post_title', $post_id );
-			if ( $ticker ) {
-				$full_meta_key = $ticker . $date . $option_type;
-				$data          = get_post_meta( $post_id, $full_meta_key, true );
-				if ( ! empty( $data ) && isset( $data[ $strike ] ) ) {
-					// Return just the specific strike data if requested
-					return $data[ $strike ];
-				} elseif ( ! empty( $data ) ) {
-					// Return all strikes if the specific one wasn't found
-					return $data;
-				}
-			}
-		}
-
-		return false;
+		return $calls_data;
 	}
 }

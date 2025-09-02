@@ -87,6 +87,52 @@ class WordPressApi {
 			'permission_callback' => '__return_true',
 			'args'                => $args,
 		] );
+
+		// Route to get all options data for a stock by ID: /wp-json/coco/v1/stock-options-by-id/<id>
+		register_rest_route(
+			'coco/v1',
+			'/stock-options-by-id/(?P<id>\d+)',
+			[
+				'methods'             => 'GET',
+				'callback'            => [ $this, 'get_stock_options_by_id' ],
+				'permission_callback' => '__return_true', // Adjust permissions as needed
+				'args'                => [
+					'type' => [
+						'validate_callback' => function( $param, $request, $key ) {
+							return in_array( strtolower( $param ), [ 'put', 'call' ], true );
+						},
+						'required'          => false,
+					],
+				],
+			]
+		);
+	}
+
+	/**
+	 * Get all options data for a stock by ID
+	 *
+	 * @param \WP_REST_Request $request Request object.
+	 * @return \WP_REST_Response|\WP_Error Response object.
+	 */
+	public function get_stock_options_by_id( \WP_REST_Request $request ): \WP_REST_Response|\WP_Error {
+		$id   = (int) $request['id'];
+		$type = strtolower( $request->get_param( 'type' ) );
+
+		$options_data = [];
+
+		if ( 'put' === $type ) {
+			$options_data = $this->stock_meta->get_all_puts_meta( $id );
+		} elseif ( 'call' === $type ) {
+			$options_data = $this->stock_meta->get_all_calls_meta( $id );
+		} else {
+			// If no type specified, return all post meta
+			$options_data = get_post_meta( $id, '', false );
+		}
+
+		if ( empty( $options_data ) ) {
+			return new \WP_REST_Response( [ 'message' => 'No options data found for this stock ID' ], 404 );
+		}
+		return new \WP_REST_Response( $options_data, 200 );
 	}
 
 	/**

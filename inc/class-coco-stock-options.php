@@ -139,8 +139,8 @@ class CocoStockOptions {
 	 */
 	private function init_components(): void {
 		// Initialize core components
-		$this->stock_cpt       = new Stock_CPT();
 		$this->stock_meta      = new Stock_Meta();
+		$this->stock_cpt       = new Stock_CPT( $this->stock_meta );
 		$this->cboe_connection = new CboeConnection();
 		$this->sync_data       = new SyncCboeData( $this->stock_cpt, $this->stock_meta, $this->cboe_connection );
 		$this->garbage_cleaner = new GarbageCleaner( $this->stock_cpt, $this->stock_meta );

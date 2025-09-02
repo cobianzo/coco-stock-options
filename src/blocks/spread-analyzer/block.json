@@ -7,8 +7,16 @@
     "category": "widgets",
     "icon": "image-flip-horizontal",
     "description": "A block to display an analysis of stock spreads.",
-    "supports": {
-        "html": false
+    "attributes": {
+        "side": {
+            "type": "string",
+            "enum": ["PUT", "CALL"],
+            "default": "PUT"
+        },
+        "stockId": {
+            "type": "number",
+            "default": 0
+        }
     },
     "textdomain": "coco-stock-options",
     "editorScript": "file:./index.js",

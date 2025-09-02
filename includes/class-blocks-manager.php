@@ -149,17 +149,7 @@ class BlocksManager {
             );
         }
 
-        // Localize the spread-analyzer block script
-        if ( has_block( 'coco-stock-options/spread-analyzer' ) ) {
-            wp_localize_script(
-                'coco-stock-options-spread-analyzer-view-script',
-                'spreadAnalyzerData',
-                [
-                    'strategy' => 'Iron Condor',
-                    'risk' => 'Defined',
-                ]
-            );
-        }
+        
     }
 
     /**
