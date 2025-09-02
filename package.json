@@ -37,6 +37,7 @@
     "@types/wordpress__blocks": "^12.5.17",
     "@typescript-eslint/eslint-plugin": "^6.21.0",
     "@typescript-eslint/parser": "^6.21.0",
+    "@wordpress/core-data": "^7.29.0",
     "@wordpress/env": "^10.2.0",
     "@wordpress/eslint-plugin": "^22.11.0",
     "@wordpress/scripts": "^26.0.0",

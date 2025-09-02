@@ -1,18 +1,24 @@
 import React from 'react';
 import useGetStockPost from './hooks/useGetStockPost';
 import useGetStockOptions from './hooks/useGetStockOptions';
+import { extractDateFromSymbol } from './helpers/sanitazors';
 
-const SpreadAnalyzerApp = ({ side, stockId }) => {
+const SpreadAnalyzerApp = ({ side, stockId }: { side: 'PUT' | 'CALL', stockId: number }) => {
+
+		const [spreadDates, setSpreadDates] = React.useState<string[]>([]);
     const { post, loading: postLoading, error: postError } = useGetStockPost(stockId);
     const { options, loading: optionsLoading, error: optionsError } = useGetStockOptions(stockId, side.toLowerCase() as 'put' | 'call');
 
+		React.useEffect(() => {
+			if (! options) return;
+
+			setSpreadDates(Object.keys(options).map( date6digits => extractDateFromSymbol(date6digits).toLocaleDateString() ) );
+
+		}, [options]);
+
     return (
         <div>
-            <h3>SpreadAnalyzer Frontend</h3>
-            <p>Selected Side: <strong>{side}</strong></p>
-            <p>Selected Stock ID: <strong>{stockId}</strong></p>
-
-            <h4>Stock Post Data:</h4>
+            <h3>{ side == 'PUT' ? 'Bear Put' : 'Bull Call' } Spread Analyzer for { post?.title?.rendered || 'Unknown' } </h3>
             {postLoading && <p>Loading post data...</p>}
             {postError && <p>Error fetching post: {postError.message}</p>}
 
@@ -23,6 +29,8 @@ const SpreadAnalyzerApp = ({ side, stockId }) => {
             {options && (
                 <pre>
                     <code>{Object.keys(options).length} dates</code>
+                    <br />
+                    <code>{spreadDates.join(', ')}</code>
                 </pre>
             )}
         </div>
