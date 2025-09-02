@@ -18,3 +18,27 @@ export const extractDateFromSymbol = (symbol: string): Date => {
 
     return new Date(year, month, day);
 };
+
+/**
+ * Converts strike price string to number with correct decimals
+ * @param strikePrice Strike price string where last 3 digits are decimals (e.g. '002500')
+ * @returns Number with correct decimal places (e.g. 2.500)
+ */
+export const sanitizeStrikePrice = (strikePrice: string): number => {
+    if (!strikePrice || !/^\d+$/.test(strikePrice)) {
+        throw new Error('Invalid strike price format');
+    }
+
+    let strikeFloat = parseFloat(strikePrice);
+
+    return strikeFloat / 1000;
+};
+
+export const extractFormalStrikePrice = (strikePrice: number): string => {
+    let formal =  strikePrice.toFixed(3).replace('.', '');
+    // Pad with leading zeros if less than 6 digits
+    while (formal.length < 8) {
+        formal = '0' + formal;
+    }
+    return formal;
+}
