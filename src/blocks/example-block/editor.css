@@ -1,0 +1,6 @@
+/* Add any editor-specific styles here. */
+.wp-block-coco-stock-options-example-block {
+  background-color: #fff;
+  border: 1px dashed #ccc;
+  padding: 1rem;
+}

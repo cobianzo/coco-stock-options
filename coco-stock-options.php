@@ -28,6 +28,8 @@ define( 'COCO_STOCK_OPTIONS_VERSION', '1.0.0' );
 define( 'COCO_STOCK_OPTIONS_FILE', __FILE__ );
 define( 'COCO_STOCK_OPTIONS_DIR', plugin_dir_path( __FILE__ ) );
 define( 'COCO_STOCK_OPTIONS_URL', plugin_dir_url( __FILE__ ) );
+define( 'COCO_STOCK_OPTIONS_BUILD_DIR', COCO_STOCK_OPTIONS_DIR . 'build/' );
+define( 'COCO_STOCK_OPTIONS_BUILD_URL', COCO_STOCK_OPTIONS_URL . 'build/' );
 
 /**
  * Initialize plugin
@@ -51,8 +53,14 @@ function coco_mp_init(): void {
 	require_once COCO_STOCK_OPTIONS_DIR . 'inc/models/class-stock-ui.php';
 	require_once COCO_STOCK_OPTIONS_DIR . 'inc/class-coco-stock-options.php';
 
+	// Include blocks system
+	require_once COCO_STOCK_OPTIONS_DIR . 'includes/class-blocks-manager.php';
+
 	// Initialize the main plugin
 	\CocoStockOptions\CocoStockOptions::get_instance();
+	
+	// Initialize blocks system
+	\CocoStockOptions\BlocksManager::get_instance();
 }
 
 // Initialize the plugin

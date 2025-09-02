@@ -3,161 +3,141 @@
  * Stock UI class
  *
  * @package CocoStockOptions
- * @since 1.0.0
  */
 
 namespace CocoStockOptions\Models;
 
 /**
- * Stock UI class
+ * Stock UI class for handling UI elements
  */
 class Stock_UI {
 
 	/**
-	 * Initialize the models
+	 * Helper function to get stock options data
+	 * This integrates with your existing API system
+	 *
+	 * @param string $symbol Stock symbol
+	 * @param int    $limit  Maximum number of results
+	 * @return array|\WP_Error Stock data or error
 	 */
-	public function __construct() {
-		$this->init_hooks();
-	}
+	public static function get_stock_options_data( $symbol, $limit = 10 ) {
+		// This would integrate with your existing stock options API
+		// For now, return sample data
 
-	/**
-	 * Initialize WordPress hooks
-	 */
-	private function init_hooks(): void {
-		add_action( 'add_meta_boxes', [ $this, 'add_stock_meta_boxes' ] );
-		add_action( 'add_meta_boxes', [ $this, 'remove_slug_meta_box' ] );
-		add_filter( 'manage_stock_posts_columns', [ $this, 'add_stock_columns' ] );
-		add_action( 'manage_stock_posts_custom_column', [ $this, 'render_stock_columns' ], 10, 2 );
-	}
+		if ( empty( $symbol ) ) {
+			return new \WP_Error( 'invalid_symbol', __( 'Invalid stock symbol provided.', 'coco-stock-options' ) );
+		}
 
-	/**
-	 * Add meta boxes for stock post type
-	 */
-	public function add_stock_meta_boxes(): void {
-		add_meta_box(
-			'stock_options_info',
-			__( 'Stock Options Information', 'coco-stock-options' ),
-			[ $this, 'render_stock_options_meta_box' ],
-			'stock',
-			'side',
-			'high'
+		// Sample data structure - replace with actual API call
+		return array(
+			'symbol' => strtoupper( $symbol ),
+			'options' => array(
+				array(
+					'strike' => '150.00',
+					'type' => 'call',
+					'premium' => '2.50',
+					'expiry' => '2024-12-20',
+					'volume' => 1250
+				),
+				array(
+					'strike' => '145.00',
+					'type' => 'put',
+					'premium' => '1.75',
+					'expiry' => '2024-12-20',
+					'volume' => 890
+				),
+				// More sample data...
+			),
+			'last_updated' => current_time( 'timestamp' ),
+			'total_results' => 25
 		);
-
-		add_meta_box(
-			'stock_options_json',
-			__( 'Stock Options JSON', 'coco-stock-options' ),
-			[ $this, 'render_stock_options_json_meta_box' ],
-			'stock',
-			'normal',
-			'low'
-		);
 	}
 
 	/**
-	 * Remove slug meta box for stock post type
-	 */
-	public function remove_slug_meta_box(): void {
-		remove_meta_box( 'slugdiv', 'stock', 'normal' );
-	}
-
-	/**
-	 * Render stock options meta box
+	 * Render stock data as a table
 	 *
-	 * @param WP_Post $post Post object.
+	 * @param array $data Stock options data
+	 * @param int   $limit Maximum rows to display
 	 */
-	public function render_stock_options_meta_box( \WP_Post $post ): void {
-		$stock_meta    = new \CocoStockOptions\Models\Stock_Meta();
-		$options_keys  = $stock_meta->get_stock_options_keys( $post->ID );
-		$options_count = count( $options_keys );
-
-		echo '<div class="stock-options-info">';
-		echo '<p><strong>' . __( 'Total Options:', 'coco-stock-options' ) . '</strong> ' . $options_count . '</p>';
-
-		if ( $options_count > 0 ) {
-			$latest_option = $stock_meta->get_latest_option_data( $post->ID, $post->post_title );
-			if ( $latest_option ) {
-				echo '<p><strong>' . __( 'Last Updated:', 'coco-stock-options' ) . '</strong> ' . esc_html( $latest_option['last_update'] ) . '</p>';
-			}
+	public static function render_stock_table( $data, $limit ) {
+		if ( empty( $data['options'] ) ) {
+			return;
 		}
 
-		echo '<p><em>' . __( 'Options data is automatically synced from CBOE API.', 'coco-stock-options' ) . '</em></p>';
-		echo '</div>';
+		$options = array_slice( $data['options'], 0, $limit );
+		?>
+		<table class="stock-options-table">
+			<thead>
+				<tr>
+					<th><?php esc_html_e( 'Strike', 'coco-stock-options' ); ?></th>
+					<th><?php esc_html_e( 'Type', 'coco-stock-options' ); ?></th>
+					<th><?php esc_html_e( 'Premium', 'coco-stock-options' ); ?></th>
+					<th><?php esc_html_e( 'Expiry', 'coco-stock-options' ); ?></th>
+					<th><?php esc_html_e( 'Volume', 'coco-stock-options' ); ?></th>
+				</tr>
+			</thead>
+			<tbody>
+				<?php foreach ( $options as $option ) : ?>
+					<tr class="option-row option-type-<?php echo esc_attr( $option['type'] ); ?>">
+						<td class="strike-price">$<?php echo esc_html( $option['strike'] ); ?></td>
+						<td class="option-type"><?php echo esc_html( ucfirst( $option['type'] ) ); ?></td>
+						<td class="premium">$<?php echo esc_html( $option['premium'] ); ?></td>
+						<td class="expiry-date"><?php echo esc_html( date( 'M j, Y', strtotime( $option['expiry'] ) ) ); ?></td>
+						<td class="volume"><?php echo esc_html( number_format( $option['volume'] ) ); ?></td>
+					</tr>
+				<?php endforeach; ?>
+			</tbody>
+		</table>
+		<?php
 	}
 
 	/**
-	 * Render stock options json meta box
+	 * Render stock data as a chart placeholder
 	 *
-	 * @param WP_Post $post Post object.
+	 * @param array  $data Stock options data
+	 * @param string $container_id Unique container ID
 	 */
-	public function render_stock_options_json_meta_box( \WP_Post $post ): void {
-		$stock_meta   = new \CocoStockOptions\Models\Stock_Meta();
-		$options_keys = $stock_meta->get_stock_options_keys( $post->ID );
-		$options_data = [];
-
-		foreach ( $options_keys as $meta_key ) {
-			$fields      = $stock_meta->parse_meta_key( $meta_key );
-			$option_type = match ( $fields['option_type'] ) {
-				'C' => 'CALL',
-				'P' => 'PUT',
-				default => 'Unknown',
-			};
-			$date_parts = str_split( $fields['date'], 2 );
-			$date       = sprintf(
-				'%dth %s %d',
-				intval( $date_parts[2] ),
-				date( 'M', mktime( 0, 0, 0, intval( $date_parts[1] ), 1 ) ),
-				2000 + intval( $date_parts[0] )
-			);
-			printf( '<h3>%s - %s</h3>', $option_type, $date );
-			echo '';
-			echo '<pre>' . json_encode( $stock_meta->get_stock_options( $post->ID, $meta_key ), JSON_PRETTY_PRINT ) . '</pre>';
-		}
+	public static function render_stock_chart( $data, $container_id ) {
+		?>
+		<div class="stock-chart-container">
+			<div class="chart-placeholder" data-chart-data="<?php echo esc_attr( wp_json_encode( $data ) ); ?>">
+				<p><?php esc_html_e( 'Chart visualization would be rendered here using JavaScript.', 'coco-stock-options' ); ?></p>
+				<p><em><?php esc_html_e( 'This requires frontend JavaScript implementation.', 'coco-stock-options' ); ?></em></p>
+			</div>
+		</div>
+		<?php
 	}
 
 	/**
-	 * Add custom columns to stock post type list
+	 * Render stock data summary
 	 *
-	 * @param array $columns Existing columns.
-	 * @return array Modified columns.
+	 * @param array $data Stock options data
 	 */
-	public function add_stock_columns( array $columns ): array {
-		$new_columns = [];
-
-		foreach ( $columns as $key => $value ) {
-			$new_columns[ $key ] = $value;
-			if ( 'title' === $key ) {
-				$new_columns['options_count'] = __( 'Options Count', 'coco-stock-options' );
-				$new_columns['last_sync']     = __( 'Last Sync', 'coco-stock-options' );
-			}
+	public static function render_stock_summary( $data ) {
+		if ( empty( $data['options'] ) ) {
+			return;
 		}
 
-		return $new_columns;
-	}
-
-	/**
-	 * Render custom columns for stock post type
-	 *
-	 * @param string $column Column name.
-	 * @param int    $post_id Post ID.
-	 */
-	public function render_stock_columns( string $column, int $post_id ): void {
-		$stock_meta = new \CocoStockOptions\Models\Stock_Meta();
-		switch ( $column ) {
-			case 'options_count':
-				$options_keys = $stock_meta->get_stock_options_keys( $post_id );
-				$count        = count( $options_keys );
-				echo '<span class="options-count">' . $count . '</span>';
-				break;
-
-			case 'last_sync':
-				$post        = get_post( $post_id );
-				$latest_data = $stock_meta->get_latest_option_data( $post_id, $post->post_title );
-				if ( $latest_data && isset( $latest_data['last_update'] ) ) {
-					echo '<span class="last-sync">' . esc_html( $latest_data['last_update'] ) . '</span>';
-				} else {
-					echo '<span class="no-sync">' . __( 'Never', 'coco-stock-options' ) . '</span>';
-				}
-				break;
-		}
+		$total_calls = count( array_filter( $data['options'], fn( $opt ) => $opt['type'] === 'call' ) );
+		$total_puts = count( array_filter( $data['options'], fn( $opt ) => $opt['type'] === 'put' ) );
+		$total_volume = array_sum( array_column( $data['options'], 'volume' ) );
+		?>
+		<div class="stock-summary">
+			<div class="summary-stats">
+				<div class="stat-item">
+					<span class="stat-label"><?php esc_html_e( 'Total Calls:', 'coco-stock-options' ); ?></span>
+					<span class="stat-value"><?php echo esc_html( $total_calls ); ?></span>
+				</div>
+				<div class="stat-item">
+					<span class="stat-label"><?php esc_html_e( 'Total Puts:', 'coco-stock-options' ); ?></span>
+					<span class="stat-value"><?php echo esc_html( $total_puts ); ?></span>
+				</div>
+				<div class="stat-item">
+					<span class="stat-label"><?php esc_html_e( 'Total Volume:', 'coco-stock-options' ); ?></span>
+					<span class="stat-value"><?php echo esc_html( number_format( $total_volume ) ); ?></span>
+				</div>
+			</div>
+		</div>
+		<?php
 	}
 }

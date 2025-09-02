@@ -1,0 +1,60 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "coco-stock-options/example-block",
+	"version": "1.0.0",
+	"title": "Stock Options Display",
+	"category": "widgets",
+	"icon": "chart-line",
+	"description": "Display stock options data dynamically from your API",
+	"example": {},
+	"supports": {
+		"html": false,
+		"anchor": true,
+		"spacing": {
+			"margin": true,
+			"padding": true
+		},
+		"typography": {
+			"fontSize": true,
+			"lineHeight": true
+		},
+		"color": {
+			"background": true,
+			"text": true,
+			"link": true
+		}
+	},
+	"attributes": {
+		"stockSymbol": {
+			"type": "string",
+			"default": "AAPL"
+		},
+		"displayType": {
+			"type": "string",
+			"default": "table",
+			"enum": ["table", "chart", "summary"]
+		},
+		"maxResults": {
+			"type": "number",
+			"default": 10
+		},
+		"showHeader": {
+			"type": "boolean",
+			"default": true
+		},
+		"backgroundColor": {
+			"type": "string",
+			"default": "#ffffff"
+		},
+		"textColor": {
+			"type": "string",
+			"default": "#333333"
+		}
+	},
+	"textdomain": "coco-stock-options",
+	"editorScript": "file:./index.js",
+	"editorStyle": "file:./editor.css",
+	"style": "file:./style.css",
+	"render": "file:./render.php"
+}

@@ -1,0 +1,39 @@
+---
+description: WP ENV plugin development stack
+globs:
+alwaysApply: true
+---
+
+- I am developing a plugin for WordPress
+- I am using the environment wp-env to develop it
+
+- I use custom node and bash scripts to automate some tasks, like:
+	- the building and zipping of the plugin for distribution: using `/bin/build-plugin.js` into the `/dist`
+	- the increase of the version (patch, minor, major) all around the code with `/bin/version.increment.js`
+
+# PHP Code
+
+- Most of the PHP logic will be in `/inc`
+- I use PHPCS, PHPBF, PHPStan, EsLint as development tools.
+- I use PHPUnit testing inside if the folder `/tests`
+
+## Practices in PHP Code
+
+- I work in OOP instead of procedural functions.
+- I always use the standards of WordPress VIP coding rules.
+- Use SOLID principles.
+- Try not to create long files with more than 250 lines of code (excluding comments)
+- Whenever you create a new file whose code is needed for the plugin, you must include the file in the entry file `coco-stock-options.php`
+- Leave some empty lines from time to time to make the code more understandable. Adding comments whenever the code is making certaing task.
+
+# Typescript -> Javascript Code
+
+- We use typescript for the javascript code
+- The entry point for the typescript is `/src/index.ts` and in it compiles into `/build/index.js`, which is enqueued by the php in `/inc/class-admin-enqueue.php`
+- Most of the typescript code is in `/src`, and it compiles into `/build` using wp-script package.
+
+# WHAT THE PLUGIN DOES
+
+- Refer to these files to know what the plugin does
+- README.md
+- .cursor/rules/project-definition.mdc

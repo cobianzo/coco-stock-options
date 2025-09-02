@@ -1,0 +1,184 @@
+/**
+ * Frontend styles for the Stock Options Display block
+ */
+
+.wp-block-coco-stock-options-example-block {
+    padding: 1.5rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin: 1.5rem 0;
+}
+
+.stock-options-header {
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid #e5e7eb;
+}
+
+.stock-symbol-title {
+    margin: 0 0 0.5rem 0;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #1f2937;
+}
+
+.last-updated {
+    font-size: 0.875rem;
+    color: #6b7280;
+}
+
+.stock-options-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1rem 0;
+    overflow: hidden;
+    border-radius: 6px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.stock-options-table th {
+    background-color: #f9fafb;
+    padding: 1rem 0.75rem;
+    text-align: left;
+    font-weight: 600;
+    font-size: 0.875rem;
+    color: #374151;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.stock-options-table td {
+    padding: 0.75rem;
+    border-bottom: 1px solid #f3f4f6;
+    font-size: 0.875rem;
+}
+
+.stock-options-table tbody tr:hover {
+    background-color: #f9fafb;
+}
+
+.option-type-call {
+    background-color: rgba(34, 197, 94, 0.05);
+}
+
+.option-type-call:hover {
+    background-color: rgba(34, 197, 94, 0.1);
+}
+
+.option-type-put {
+    background-color: rgba(239, 68, 68, 0.05);
+}
+
+.option-type-put:hover {
+    background-color: rgba(239, 68, 68, 0.1);
+}
+
+.strike-price {
+    font-weight: 600;
+    color: #1f2937;
+}
+
+.option-type {
+    text-transform: uppercase;
+    font-weight: 500;
+    font-size: 0.75rem;
+    letter-spacing: 0.05em;
+}
+
+.premium {
+    font-weight: 600;
+    color: #059669;
+}
+
+.volume {
+    color: #6b7280;
+}
+
+/* Chart container styles */
+.stock-chart-container {
+    margin: 1rem 0;
+    padding: 1rem;
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+    background-color: #f9fafb;
+}
+
+.chart-placeholder {
+    text-align: center;
+    padding: 2rem;
+    color: #6b7280;
+}
+
+/* Summary styles */
+.stock-summary {
+    margin: 1rem 0;
+}
+
+.summary-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1rem;
+}
+
+.stat-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 1.5rem 1rem;
+    background-color: #f9fafb;
+    border-radius: 6px;
+    border: 1px solid #e5e7eb;
+}
+
+.stat-label {
+    font-size: 0.875rem;
+    color: #6b7280;
+    margin-bottom: 0.5rem;
+    text-align: center;
+}
+
+.stat-value {
+    font-size: 1.875rem;
+    font-weight: 700;
+    color: #1f2937;
+}
+
+/* Error and loading states */
+.stock-options-error {
+    padding: 1rem;
+    background-color: #fef2f2;
+    border: 1px solid #fecaca;
+    border-radius: 6px;
+    color: #dc2626;
+}
+
+.error-details {
+    margin-top: 0.5rem;
+    font-size: 0.875rem;
+    color: #7f1d1d;
+}
+
+.stock-options-loading {
+    text-align: center;
+    padding: 2rem;
+    color: #6b7280;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .stock-options-table {
+        font-size: 0.75rem;
+    }
+    
+    .stock-options-table th,
+    .stock-options-table td {
+        padding: 0.5rem 0.25rem;
+    }
+    
+    .summary-stats {
+        grid-template-columns: 1fr;
+    }
+    
+    .wp-block-coco-stock-options-example-block {
+        padding: 1rem;
+    }
+}

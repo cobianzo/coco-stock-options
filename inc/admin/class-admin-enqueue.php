@@ -30,11 +30,11 @@ class AdminEnqueue {
 
 		// Only enqueue on our plugin pages
 		if ( $screen && ( strpos( $screen->id, 'coco-stock-options' ) !== false || $screen->post_type === 'stock' ) ) {
-			$asset_file = include COCO_STOCK_OPTIONS_DIR . 'build/index.asset.php';
+			$asset_file = include COCO_STOCK_OPTIONS_DIR . 'build/admin.asset.php';
 
 			wp_enqueue_script(
 				'coco-stock-options-admin',
-				COCO_STOCK_OPTIONS_URL . 'build/index.js',
+				COCO_STOCK_OPTIONS_URL . 'build/admin.js',
 				$asset_file['dependencies'],
 				$asset_file['version'],
 				true
