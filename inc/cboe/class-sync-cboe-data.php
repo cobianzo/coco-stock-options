@@ -69,51 +69,57 @@ class SyncCboeData {
 	 *     @type string   $timestamp Timestamp of the sync operation.
 	 * }
 	 */
-	public function sync_stock_options( string $symbol ): array {
-		$results = [
-			'symbol'    => $symbol,
-			'success'   => false,
-			'message'   => '',
-			'processed' => 0,
-			'errors'    => [],
-			'timestamp' => current_time( 'mysql' ),
-		];
+public function sync_stock_options( string $symbol ): array {
+    $results = [
+        'symbol'    => $symbol,
+        'success'   => false,
+        'message'   => '',
+        'processed' => 0,
+        'errors'    => [],
+        'timestamp' => current_time( 'mysql' ),
+    ];
 
-		// Get stock post
-		$stock_post = $this->stock_cpt->get_stock_by_symbol( $symbol );
-		if ( ! $stock_post ) {
-			$results['message'] = sprintf( 'Stock %s not found in database', $symbol );
-			return $results;
-		}
+    // Get stock post
+    $stock_post = $this->stock_cpt->get_stock_by_symbol( $symbol );
+    if ( ! $stock_post ) {
+        $results['message'] = sprintf( 'Stock %s not found in database', $symbol );
+        return $results;
+    }
 
-		// Get CBOE data
-		$cboe_data = $this->cboe_connection->get_stock_options( $symbol );
-		if ( is_wp_error( $cboe_data ) ) {
-			$results['message'] = $cboe_data->get_error_message();
-			return $results;
-		}
+    // Get CBOE data
+    $cboe_data = $this->cboe_connection->get_stock_options( $symbol );
+    if ( is_wp_error( $cboe_data ) ) {
+        $results['message'] = $cboe_data->get_error_message();
+        return $results;
+    }
 
-		// Validate CBOE response
-		if ( ! $this->cboe_connection->validate_cboe_response( $cboe_data ) ) {
-			$results['message'] = 'Invalid CBOE API response structure';
-			return $results;
-		}
+    // Validate CBOE response
+    if ( ! $this->cboe_connection->validate_cboe_response( $cboe_data ) ) {
+        $results['message'] = 'Invalid CBOE API response structure';
+        return $results;
+    }
 
-		// Parse and save options data
-		$parse_results = $this->parse_and_save_options( $stock_post->ID, $cboe_data );
+    // Clean up old post meta before saving new options
+    $old_options = $this->stock_meta->get_stock_options_keys( $stock_post->ID );
+    foreach ( $old_options as $meta_key ) {
+        delete_post_meta( $stock_post->ID, $meta_key );
+    }
 
-		$results['success']   = $parse_results['success'];
-		$results['processed'] = $parse_results['processed'];
-		$results['errors']    = $parse_results['errors'];
+    // Parse and save options data
+    $parse_results = $this->parse_and_save_options( $stock_post->ID, $cboe_data );
 
-		if ( $parse_results['success'] ) {
-			$results['message'] = sprintf( 'Successfully processed %d options for %s', $parse_results['processed'], $symbol );
-		} else {
-			$results['message'] = 'Failed to process options data';
-		}
+    $results['success']   = $parse_results['success'];
+    $results['processed'] = $parse_results['processed'];
+    $results['errors']    = $parse_results['errors'];
 
-		return $results;
-	}
+    if ( $parse_results['success'] ) {
+        $results['message'] = sprintf( 'Successfully processed %d options for %s', $parse_results['processed'], $symbol );
+    } else {
+        $results['message'] = 'Failed to process options data';
+    }
+
+    return $results;
+}
 
 	/**
 	 * Parse CBOE data and save to database

@@ -107,6 +107,19 @@ class WordPressApi {
 			'args'                => $args,
 		] );
 
+		// Route to sync stock data from CBOE: /wp-json/coco/v1/sync-stock/<symbol>
+		register_rest_route( 'coco/v1', '/sync-stock/(?P<symbol>[a-zA-Z]+)', [
+			'methods'             => 'POST',
+			'callback'            => [ $this, 'callback_sync_stock_from_cboe' ],
+			'permission_callback' => [ $this, 'check_sync_permissions' ],
+			'args'                => [
+				'symbol' => [
+					'required'          => true,
+					'validate_callback' => [ $this->validator, 'validate_symbol' ],
+				],
+			],
+		] );
+
 		// Route to get all options data for a stock by ID: /wp-json/coco/v1/stock-options-by-id/<id>
 		register_rest_route(
 			'coco/v1',
@@ -255,13 +268,10 @@ class WordPressApi {
 	 */
 	private function get_stockoptions_for_date( int $post_id, string $date, string $type ): \WP_REST_Response|\WP_Error {
 
-		$post_meta_key = get_post_field( 'post_title', $post_id ) . $date . $type;
-		$pp            = $this->stock_meta->get_stock_options(
-			$post_id,
-			$post_meta_key
-		);
-		if ( $pp ) {
-			return new \WP_REST_Response( $pp, 200 );
+		$ticker        = get_post_field( 'post_title', $post_id );
+		$options_data  = $this->stock_meta->get_stock_options_by_date( $post_id, $ticker, $date, $type );
+		if ( $options_data ) {
+			return new \WP_REST_Response( $options_data, 200 );
 		}
 
 		// TODO: check if this code is needed.
@@ -271,9 +281,9 @@ class WordPressApi {
 		$options_data = [];
 
 		foreach ( $options_keys as $meta_key ) {
-			// Check if meta key starts with the date and contains the type
-			if ( str_starts_with( $meta_key, $date ) && str_contains( $meta_key, $type ) ) {
-				$options_data[ $meta_key ] = $this->stock_meta->get_stock_options( $post_id, $meta_key );
+			// Check if meta key contains the date and type
+			if ( str_contains( $meta_key, $date ) && str_contains( $meta_key, $type ) ) {
+				$options_data[ $meta_key ] = get_post_meta( $post_id, $meta_key, true );
 			}
 		}
 
@@ -336,6 +346,101 @@ class WordPressApi {
 	}
 
 	/**
+	 * Sync stock data from CBOE endpoint callback
+	 *
+	 * @param \WP_REST_Request $request Request object.
+	 * @return \WP_REST_Response|\WP_Error Response object.
+	 */
+	public function callback_sync_stock_from_cboe( \WP_REST_Request $request ): \WP_REST_Response|\WP_Error {
+		$symbol = strtoupper( $request->get_param( 'symbol' ) );
+
+		// Verify that the stock exists in our database
+		$stock_post = $this->stock_cpt->get_stock_by_symbol( $symbol );
+		if ( ! $stock_post ) {
+			return new \WP_Error(
+				'stock_not_found',
+				sprintf( 'Stock %s not found in database. Please add it first.', $symbol ),
+				[ 'status' => 404 ]
+			);
+		}
+
+		try {
+			// Get the SyncCboeData instance from the main plugin
+			$plugin    = \CocoStockOptions\CocoStockOptions::get_instance();
+			$sync_data = $plugin->get_sync_data();
+
+			// Perform the sync
+			$result = $sync_data->sync_stock_options( $symbol );
+
+			// Prepare response data
+			$response_data = [
+				'success'           => $result['success'],
+				'symbol'            => $result['symbol'],
+				'message'           => $result['message'],
+				'options_processed' => $result['processed'],
+				'timestamp'         => $result['timestamp'],
+			];
+
+			// Add errors if any
+			if ( ! empty( $result['errors'] ) ) {
+				$response_data['errors'] = $result['errors'];
+			}
+
+			// Add stock information
+			if ( $result['success'] ) {
+				$options_keys                    = $this->stock_meta->get_stock_options_keys( $stock_post->ID );
+				$response_data['total_options']  = count( $options_keys );
+				$response_data['stock_post_id']  = $stock_post->ID;
+
+				// Get latest option data for additional info
+				$latest_data = $this->stock_meta->get_latest_option_data( $stock_post->ID, $symbol );
+				if ( $latest_data ) {
+					$response_data['latest_update'] = $latest_data['last_update'] ?? null;
+				}
+			}
+
+			$status_code = $result['success'] ? 200 : 422; // 422 Unprocessable Entity for sync failures
+			return new \WP_REST_Response( $response_data, $status_code );
+
+		} catch ( \Exception $e ) {
+			return new \WP_Error(
+				'sync_exception',
+				sprintf( 'An error occurred while syncing %s: %s', $symbol, $e->getMessage() ),
+				[ 'status' => 500 ]
+			);
+		}
+	}
+
+	/**
+	 * Check permissions for sync operations
+	 *
+	 * @param \WP_REST_Request $request Request object.
+	 * @return bool|\WP_Error True if user has permissions, false or WP_Error otherwise.
+	 */
+	public function check_sync_permissions( \WP_REST_Request $request ): bool|\WP_Error {
+		// Allow only authenticated users with capability to manage options
+		// You can adjust this based on your security requirements
+		if ( ! is_user_logged_in() ) {
+			return new \WP_Error(
+				'auth_required',
+				'Authentication required for sync operations',
+				[ 'status' => 401 ]
+			);
+		}
+
+		// Check if user can manage options (admin capability)
+		if ( ! current_user_can( 'manage_options' ) ) {
+			return new \WP_Error(
+				'insufficient_permissions',
+				'Insufficient permissions for sync operations',
+				[ 'status' => 403 ]
+			);
+		}
+
+		return true;
+	}
+
+	/**
 	 * Get API documentation
 	 *
 	 * @return array API documentation.
@@ -390,6 +495,13 @@ class WordPressApi {
 					'method'      => 'GET',
 					'description' => 'Get a specific field from a call option',
 					'example'     => '/wp-json/coco/v1/calls/LMT?date=250801&strike=310&field=bid',
+				],
+				'sync_stock_from_cboe'    => [
+					'url'         => '/wp-json/coco/v1/sync-stock/{symbol}',
+					'method'      => 'POST',
+					'description' => 'Sync a stock\'s options data from CBOE API (requires authentication)',
+					'example'     => '/wp-json/coco/v1/sync-stock/LMT',
+					'auth'        => 'Required (manage_options capability)',
 				],
 			],
 			'parameters' => [

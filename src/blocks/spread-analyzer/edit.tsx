@@ -8,7 +8,6 @@ export default function Edit({ attributes, setAttributes }) {
 
     const { stocks, hasResolved } = useSelect((select) => {
         const selector = select('core');
-				debugger
         return {
             stocks: selector.getEntityRecords('postType', 'stock', { per_page: -1 }),
             hasResolved: selector.hasFinishedResolution('getEntityRecords', ['postType', 'stock', { per_page: -1 }]),

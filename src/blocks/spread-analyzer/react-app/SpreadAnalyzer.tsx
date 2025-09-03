@@ -24,8 +24,8 @@ const SpreadAnalyzerApp = ({ side, stockId }: { side: 'PUT' | 'CALL'; stockId: n
 
 	// Custom hooks
 	// ==============================
-	const { optionsData, loading: optionsLoading, error: optionsError }: {
-			optionsData: WPAllOptionsData, loading: boolean, error: Error | null
+	const { optionsData, loading: optionsLoading, error: optionsError, refetch: refetchOptionsData }: {
+			optionsData: WPAllOptionsData, loading: boolean, error: Error | null, refetch: () => void
 		} = useGetStockOptions( stockId, side.toLowerCase() as 'put' | 'call' );
 	const { validStrikes } = useValidStrikes(optionsData);
 	const { post, loading: postLoading, error: postError } = useGetStockPost(stockId);
@@ -102,7 +102,7 @@ const SpreadAnalyzerApp = ({ side, stockId }: { side: 'PUT' | 'CALL'; stockId: n
 			{postError && <p>Error fetching post: {postError.message}</p>}
 
 			{/* Panel de comandos de edición */}
-			<Controls validStrikes={validStrikes}
+			<Controls validStrikes={validStrikes || []}
 				strikeSell={strikeSell} setStrikeSell={setStrikeSell}
 				strikeBuy={strikeBuy} setStrikeBuy={setStrikeBuy}
 			/>
@@ -111,7 +111,10 @@ const SpreadAnalyzerApp = ({ side, stockId }: { side: 'PUT' | 'CALL'; stockId: n
 			{chartData.length > 0 && (
 				<div className="chart-container">
 					<h4>Prima Sell Over Time</h4>
-					<ReloadData optionsData={optionsData} stockId={stockId} side={side.toLowerCase() as 'put' | 'call'} />
+					<ReloadData
+						stockPostTitle={post?.title?.rendered ?? null}
+						refetch={refetchOptionsData}
+					/>
 					<p>Latest update: {getLatestUpdateFromFirstElement(optionsData)} ({Math.floor((Date.now() - new Date(getLatestUpdateFromFirstElement(optionsData)).getTime()) / (1000 * 60 * 60 * 24))} days ago)</p>
 
 					<ChartDatesPrimas chartData={chartData} />
