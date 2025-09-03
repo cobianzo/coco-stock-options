@@ -56,11 +56,11 @@ function coco_mp_init(): void {
 	require_once COCO_STOCK_OPTIONS_DIR . 'inc/class-coco-stock-options.php';
 
 	// Include blocks system
-	require_once COCO_STOCK_OPTIONS_DIR . 'includes/class-blocks-manager.php';
+	require_once COCO_STOCK_OPTIONS_DIR . 'inc/class-blocks-manager.php';
 
 	// Initialize the main plugin
 	\CocoStockOptions\CocoStockOptions::get_instance();
-	
+
 	// Initialize blocks system
 	\CocoStockOptions\BlocksManager::get_instance();
 }
