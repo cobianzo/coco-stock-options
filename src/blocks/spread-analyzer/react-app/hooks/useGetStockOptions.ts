@@ -26,6 +26,7 @@ const useGetStockOptions = (stockId: number, type?: 'put' | 'call') => {
 			.then((fetchedOptions) => {
 				if (fetchedOptions) {
 					setOptionsData(fetchedOptions as WPAllOptionsData);
+					setError(null);
 				} else {
 					setError(new Error('error fetching, unknown'));
 				}

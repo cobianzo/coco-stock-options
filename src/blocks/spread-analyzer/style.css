@@ -63,16 +63,16 @@
     border-radius: 8px;
 
     .editing-commands-panel-left {
-      font-size: 1rem;;
-      flex-basis: 30%;
-      small {
-        color: gray;
-        display: block;;
-      }
+        font-size: 1rem;
+        flex-basis: 30%;
+        small {
+            color: gray;
+            display: block;
+        }
     }
 
     p {
-      font-size: 1rem;;
+        font-size: 1rem;
     }
 }
 
@@ -100,10 +100,22 @@
     gap: 0.75rem;
 }
 
+.wp-block-coco-stock-options-spread-analyzer .column-right {
+    height: 100%;
+    align-items: start;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
 .wp-block-coco-stock-options-spread-analyzer .input-group {
     display: flex;
     flex-direction: column;
     gap: 0.25rem;
+
+    &.input-group-ticks-gap {
+        flex-direction: row;
+    }
 }
 
 .wp-block-coco-stock-options-spread-analyzer .input-group label {
@@ -123,6 +135,11 @@
     transition:
         border-color 0.15s ease-in-out,
         box-shadow 0.15s ease-in-out;
+
+    &#ticks-gap {
+        width: 80px;
+        opacity: 0.6;
+    }
 }
 
 .wp-block-coco-stock-options-spread-analyzer .input-group input:focus {
@@ -131,7 +148,7 @@
     box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
-.wp-block-coco-stock-options-spread-analyzer .input-group input:hover {
+.wp-block-coco-stock-options-spread-analyzer .input-group input:not([disabled]):hover {
     border-color: #9ca3af;
 }
 

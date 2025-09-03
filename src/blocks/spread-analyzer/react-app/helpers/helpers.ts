@@ -37,3 +37,14 @@ export function getLatestUpdateFromFirstElement(optionsData: WPAllOptionsData): 
   const firstOption = optionsData[firstDate][firstStrike];
   return firstOption?.cboe_timestamp ?? '';
 }
+
+export function isValidValue( validValues: number[], value: number, fallback = true ): string | boolean {
+	if (validValues.includes(value)) {
+			return value.toFixed(3);
+	} else if (fallback && validValues.length > 0) {
+			return (validValues[0].toFixed(3) );
+	} else if (fallback ){
+			return '0.000'
+	}
+	return false;
+}

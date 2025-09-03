@@ -79,7 +79,7 @@ const SpreadAnalyzerApp = ({ side, stockId }: { side: 'PUT' | 'CALL'; stockId: n
 			const primaSell = primaSellRaw ? Number((primaSellRaw * MULTIPLIER).toFixed(2)) : null;
 			const primaBuy = buyInfo?.ask ? Number((buyInfo.ask * MULTIPLIER).toFixed(2)) : null;
 			const profit = primaSell !== null && primaBuy !== null ? primaSell - primaBuy : null;
-			const maxLoss = strikeSell - strikeBuy - (profit?? 0);
+			const maxLoss = -1 * (strikeSell - strikeBuy - (profit?? 0));
 
 			const breakEven = primaSell !== null && profit !== null && Number((strikeSell - profit/MULTIPLIER).toFixed(3));
 			return {
@@ -134,7 +134,7 @@ const SpreadAnalyzerApp = ({ side, stockId }: { side: 'PUT' | 'CALL'; stockId: n
 			{chartData.length > 0 && (
 				<div className="chart-container">
 					<div className="chart-container-title">
-						<h4>Prima Sell Over Time</h4>
+						<h4>Prima Sell - Prima Buy Over Time</h4>
 						<ReloadData
 							stockPostTitle={post?.title?.rendered ?? null}
 							refetch={refetchOptionsData}
@@ -150,7 +150,11 @@ const SpreadAnalyzerApp = ({ side, stockId }: { side: 'PUT' | 'CALL'; stockId: n
 				</div>
 			)}
 
-			<h4>Stock Options Data:</h4>
+
+			<ReloadData
+							stockPostTitle={post?.title?.rendered ?? null}
+							refetch={refetchOptionsData}
+						/>
 			{optionsLoading && <p>Loading options data...</p>}
 			{optionsError && <p>Error fetching options: {optionsError instanceof Error ? optionsError.message : String(optionsError)}</p>}
 

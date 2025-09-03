@@ -17,16 +17,10 @@ function Controls({
 }) {
 	const [isTicksGapLocked, setIsTicksGapLocked] = useState(false);
 	const [ticksGap, setTicksGap] = useState(strikeSell - strikeBuy);
-	const [loaded, setLoaded] = useState(false);
 
 	React.useEffect(() => {
-		// si se activa el lock, se calcula el gap entre los strikes
-
-		if (isTicksGapLocked || !loaded) {
-			setTicksGap(Math.abs(strikeSell - strikeBuy));
-		}
-		if (strikeSell || strikeBuy)
-			setLoaded(true);
+		// se calcula el gap entre los strikes
+		setTicksGap(Math.abs(strikeSell - strikeBuy));
 	}, [isTicksGapLocked, strikeSell, strikeBuy]);
 
 	// Handles onClick
@@ -51,8 +45,6 @@ function Controls({
 				}
 			}
 		} else {
-			// not locked, we calculate the gap.
-			setTicksGap(Math.abs(strikeSell - strikeBuy));
 		}
 	};
 
@@ -92,16 +84,19 @@ function Controls({
 
 				{/* Right column - Ticks Gap control */}
 				<div className="column column-right">
-					<button className="lock-button" onClick={() => setIsTicksGapLocked(!isTicksGapLocked)}>
-						<span className={`dashicons dashicons-${isTicksGapLocked ? 'lock' : 'unlock'}`}></span>
-					</button>
-					<div className="input-group">
-						<label htmlFor="ticksGap">Prices Gap:</label>
+					<label htmlFor="ticks-gap">Prices Gap:</label>
+					<div className="input-group input-group-ticks-gap">
+						<button className="lock-button" onClick={() => setIsTicksGapLocked(!isTicksGapLocked)}>
+							<span className={`dashicons dashicons-${isTicksGapLocked ? 'lock' : 'unlock'}`}></span>
+						</button>
 						<input
 							type="number"
+							id="ticks-gap"
+							name="ticks-gap"
 							value={ticksGap}
-							onChange={(e) => !isTicksGapLocked && setTicksGap(Number(e.target.value))}
-							disabled={isTicksGapLocked}
+							// onChange={(e) => !isTicksGapLocked && setTicksGap(Number(e.target.value))}
+							readOnly
+							disabled
 						/>
 					</div>
 				</div>
