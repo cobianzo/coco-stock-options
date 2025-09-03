@@ -10,6 +10,7 @@ namespace CocoStockOptions\Api;
 
 use CocoStockOptions\Models\Stock_CPT;
 use CocoStockOptions\Models\Stock_Meta;
+use WP_REST_Response;
 
 /**
  * WordPress API class for handling REST API endpoints
@@ -94,14 +95,14 @@ class WordPressApi {
 
 		register_rest_route( 'coco/v1', '/puts/(?P<symbol>[a-zA-Z]+)', [
 			'methods'             => 'GET',
-			'callback'            => [ $this, 'get_puts_options' ],
+			'callback'            => [ $this, 'callback_get_puts_options' ],
 			'permission_callback' => '__return_true',
 			'args'                => $args,
 		] );
 
 		register_rest_route( 'coco/v1', '/calls/(?P<symbol>[a-zA-Z]+)', [
 			'methods'             => 'GET',
-			'callback'            => [ $this, 'get_calls_options' ],
+			'callback'            => [ $this, 'callback_get_calls_options' ],
 			'permission_callback' => '__return_true',
 			'args'                => $args,
 		] );
@@ -112,7 +113,7 @@ class WordPressApi {
 			'/stock-options-by-id/(?P<id>\d+)',
 			[
 				'methods'             => 'GET',
-				'callback'            => [ $this, 'get_stock_options_by_id' ],
+				'callback'            => [ $this, 'callback_get_stock_options_by_id' ],
 				'permission_callback' => '__return_true', // Adjust permissions as needed
 				'args'                => [
 					'type'          => [
@@ -135,9 +136,9 @@ class WordPressApi {
 	 * @param \WP_REST_Request $request Request object.
 	 * @return \WP_REST_Response|\WP_Error Response object.
 	 */
-	public function get_stock_options_by_id( \WP_REST_Request $request ): \WP_REST_Response|\WP_Error {
+	public function callback_get_stock_options_by_id( \WP_REST_Request $request ): \WP_REST_Response|\WP_Error {
 		$id            = (int) $request['id'];
-		$type          = strtolower( $request->get_param( 'type' ) );
+		$type          = strtolower( $request->get_param( 'type' )?? 'all' );
 		$exclude_bid_0 = $request->get_param( 'exclude_bid_0' );
 
 		// Convert exclude_bid_0 to boolean
@@ -172,8 +173,8 @@ class WordPressApi {
 	 * @param \WP_REST_Request $request Request object.
 	 * @return \WP_REST_Response|\WP_Error Response object.
 	 */
-	public function get_puts_options( \WP_REST_Request $request ): \WP_REST_Response|\WP_Error {
-		return $this->get_options( $request, 'P' );
+	public function callback_get_puts_options( \WP_REST_Request $request ): \WP_REST_Response|\WP_Error {
+		return $this->get_api_stockoptions( $request, 'P' );
 	}
 
 	/**
@@ -182,8 +183,8 @@ class WordPressApi {
 	 * @param \WP_REST_Request $request Request object.
 	 * @return \WP_REST_Response|\WP_Error Response object.
 	 */
-	public function get_calls_options( \WP_REST_Request $request ): \WP_REST_Response|\WP_Error {
-		return $this->get_options( $request, 'C' );
+	public function callback_get_calls_options( \WP_REST_Request $request ): \WP_REST_Response|\WP_Error {
+		return $this->get_api_stockoptions( $request, 'C' );
 	}
 
 	/**
@@ -193,12 +194,13 @@ class WordPressApi {
 	 * @param string           $type    Option type (P or C).
 	 * @return \WP_REST_Response|\WP_Error Response object.
 	 */
-	private function get_options( \WP_REST_Request $request, string $type ): \WP_REST_Response|\WP_Error {
+	private function get_api_stockoptions( \WP_REST_Request $request, string $type ): \WP_REST_Response|\WP_Error {
 		$symbol = strtoupper( $request->get_param( 'symbol' ) );
 		$date   = $request->get_param( 'date' );
 		$strike = $request->get_param( 'strike' );
 		$field  = $request->get_param( 'field' );
 
+		// return new WP_REST_Response( [ 'a' => $strike?? 's' ] );
 		// Get stock post
 		$stock_post = $this->stock_cpt->get_stock_by_symbol( $symbol );
 		if ( ! $stock_post ) {
@@ -209,18 +211,18 @@ class WordPressApi {
 			);
 		}
 
+		// If strike specified, look for specific option
+		if ( !empty( $date) && ! empty( $strike ) ) {
+			return $this->get_specific_stockoption( $stock_post->ID, $date, $strike, $field, $type );
+		}
+
 		// If no date specified, return all options for the stock
 		if ( empty( $date ) ) {
 			return $this->get_all_options_for_stock( $stock_post->ID, $type );
 		}
 
-		// If strike specified, look for specific option
-		if ( ! empty( $strike ) ) {
-			return $this->get_specific_option( $stock_post->ID, $date, $strike, $field, $type );
-		}
-
 		// Return all options for specific date
-		return $this->get_options_for_date( $stock_post->ID, $date, $type );
+		return $this->get_stockoptions_for_date( $stock_post->ID, $date, $type );
 	}
 
 	/**
@@ -236,7 +238,7 @@ class WordPressApi {
 
 		foreach ( $options_keys as $meta_key ) {
 			if ( str_contains( $meta_key, $type ) ) {
-				$options_data[ $meta_key ] = $this->stock_meta->get_stock_options( $post_id, $meta_key );
+				$options_data[ $meta_key ] = get_post_meta( $post_id, $meta_key, true );
 			}
 		}
 
@@ -251,7 +253,7 @@ class WordPressApi {
 	 * @param string $type    Option type (P or C).
 	 * @return \WP_REST_Response|\WP_Error Response object.
 	 */
-	private function get_options_for_date( int $post_id, string $date, string $type ): \WP_REST_Response|\WP_Error {
+	private function get_stockoptions_for_date( int $post_id, string $date, string $type ): \WP_REST_Response|\WP_Error {
 
 		$post_meta_key = get_post_field( 'post_title', $post_id ) . $date . $type;
 		$pp            = $this->stock_meta->get_stock_options(
@@ -296,7 +298,7 @@ class WordPressApi {
 	 * @param string  $type    Option type (P or C).
 	 * @return \WP_REST_Response|\WP_Error Response object.
 	 */
-	private function get_specific_option( int $post_id, string $date, string $strike, ?string $field, string $type ): \WP_REST_Response|\WP_Error {
+	private function get_specific_stockoption( int $post_id, string $date, string $strike, ?string $field, string $type ): \WP_REST_Response|\WP_Error {
 		// Convert strike to the format used in meta key
 		$strike_formatted = $this->data_helper->format_strike_for_meta_key( $strike );
 		if ( ! $strike_formatted ) {
@@ -308,9 +310,7 @@ class WordPressApi {
 		}
 
 		$meta_key    = $date . $type . $strike_formatted;
-		$option_data = $this->stock_meta->get_stock_options( $post_id, $meta_key );
-
-		$ticker = get_post_field( 'post_title', $post_id );
+		$option_data = get_post_meta( $post_id, $meta_key, true );
 
 		if ( ! $option_data ) {
 			return new \WP_Error(

@@ -14,6 +14,7 @@ import { getOptionInfoByDateAndStrike, getLatestUpdateFromFirstElement } from '.
 import { WPStockOptionInfo, WPAllOptionsData, ChartDataType } from 'src/types/types';
 import ChartDatesPrimas from './components/ChartDatesPrimas';
 import Controls from './components/controls/Controls';
+import ReloadData from './components/controls/ReloadData';
 
 // Consts
 const SHARES_PER_CONTRACT = 100;
@@ -110,7 +111,8 @@ const SpreadAnalyzerApp = ({ side, stockId }: { side: 'PUT' | 'CALL'; stockId: n
 			{chartData.length > 0 && (
 				<div className="chart-container">
 					<h4>Prima Sell Over Time</h4>
-					<p>Latest update: {getLatestUpdateFromFirstElement(optionsData)}</p>
+					<ReloadData optionsData={optionsData} stockId={stockId} side={side.toLowerCase() as 'put' | 'call'} />
+					<p>Latest update: {getLatestUpdateFromFirstElement(optionsData)} ({Math.floor((Date.now() - new Date(getLatestUpdateFromFirstElement(optionsData)).getTime()) / (1000 * 60 * 60 * 24))} days ago)</p>
 
 					<ChartDatesPrimas chartData={chartData} />
 				</div>
