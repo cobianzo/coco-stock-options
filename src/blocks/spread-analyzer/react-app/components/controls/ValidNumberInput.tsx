@@ -3,18 +3,22 @@ import React, { useState, useRef, useEffect } from 'react';
 interface ValidNumberInputProps {
   validValues: number[];
 	defaultValue: number;
+	setDefaultValue: CallableFunction;
   onChange?: (value: number) => void;
 }
 
-const ValidNumberInput = ({ validValues, defaultValue, onChange }: ValidNumberInputProps) => {
+const ValidNumberInput = ({ validValues, defaultValue, setDefaultValue, onChange }: ValidNumberInputProps) => {
   const [inputValue, setInputValue] = useState(defaultValue?.toFixed(3) || (validValues.length > 0 ? validValues[0]?.toFixed(3) : '0.000'));
   const [showSuggestions, setShowSuggestions] = useState(false);
   const inputRef = useRef<HTMLDivElement>(null);
 
+	useEffect(() => {
+		setInputValue(defaultValue?.toFixed(3) || (validValues.length > 0 ? validValues[0]?.toFixed(3) : '0.000'));
+	}, [defaultValue]);
 
 
   const updateValue = (newValue: number | string) => {
-    setInputValue(typeof newValue === 'string' ? newValue : newValue.toFixed(3));
+    setDefaultValue( parseFloat(newValue as string) );
     if (onChange && typeof newValue === 'number') {
       onChange(newValue);
     }
