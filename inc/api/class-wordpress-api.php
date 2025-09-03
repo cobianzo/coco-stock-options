@@ -151,7 +151,7 @@ class WordPressApi {
 	 */
 	public function callback_get_stock_options_by_id( \WP_REST_Request $request ): \WP_REST_Response|\WP_Error {
 		$id            = (int) $request['id'];
-		$type          = strtolower( $request->get_param( 'type' )?? 'all' );
+		$type          = strtolower( $request->get_param( 'type' ) ?? 'all' );
 		$exclude_bid_0 = $request->get_param( 'exclude_bid_0' );
 
 		// Convert exclude_bid_0 to boolean
@@ -225,7 +225,7 @@ class WordPressApi {
 		}
 
 		// If strike specified, look for specific option
-		if ( !empty( $date) && ! empty( $strike ) ) {
+		if ( ! empty( $date ) && ! empty( $strike ) ) {
 			return $this->get_specific_stockoption( $stock_post->ID, $date, $strike, $field, $type );
 		}
 
@@ -268,8 +268,8 @@ class WordPressApi {
 	 */
 	private function get_stockoptions_for_date( int $post_id, string $date, string $type ): \WP_REST_Response|\WP_Error {
 
-		$ticker        = get_post_field( 'post_title', $post_id );
-		$options_data  = $this->stock_meta->get_stock_options_by_date( $post_id, $ticker, $date, $type );
+		$ticker       = get_post_field( 'post_title', $post_id );
+		$options_data = $this->stock_meta->get_stock_options_by_date( $post_id, $ticker, $date, $type );
 		if ( $options_data ) {
 			return new \WP_REST_Response( $options_data, 200 );
 		}
@@ -388,9 +388,9 @@ class WordPressApi {
 
 			// Add stock information
 			if ( $result['success'] ) {
-				$options_keys                    = $this->stock_meta->get_stock_options_keys( $stock_post->ID );
-				$response_data['total_options']  = count( $options_keys );
-				$response_data['stock_post_id']  = $stock_post->ID;
+				$options_keys                   = $this->stock_meta->get_stock_options_keys( $stock_post->ID );
+				$response_data['total_options'] = count( $options_keys );
+				$response_data['stock_post_id'] = $stock_post->ID;
 
 				// Get latest option data for additional info
 				$latest_data = $this->stock_meta->get_latest_option_data( $stock_post->ID, $symbol );
