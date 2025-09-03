@@ -162,7 +162,7 @@ class CocoStockOptions {
 	 */
 	private function init_hooks(): void {
 		add_action( 'init', [ $this, 'init_plugin' ] );
-		add_action( 'plugins_loaded', [ $this, 'load_textdomain' ] );
+		add_action( 'init', [ $this, 'load_textdomain' ] );
 		add_action( 'wp_loaded', [ $this, 'setup_cron_jobs' ] );
 
 		// Activation and deactivation hooks

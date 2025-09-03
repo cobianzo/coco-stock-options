@@ -132,6 +132,11 @@ class Stock_Meta {
 		return $meta_keys;
 	}
 
+	/** wrapper */
+	public function get_stock_options( $post_id, $meta_key ) {
+		return get_post_meta( $post_id, $meta_key, true );
+	}
+
 	/**
 	 * Get latest option data for a stock
 	 *
