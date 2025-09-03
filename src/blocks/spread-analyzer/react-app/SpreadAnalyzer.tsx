@@ -71,10 +71,24 @@ const SpreadAnalyzerApp = ({ side, stockId }: { side: 'PUT' | 'CALL'; stockId: n
 			const sellInfo: WPStockOptionInfo | null = getOptionInfoByDateAndStrike(optionsData, date, strikeSell as number);
 			const buyInfo: WPStockOptionInfo | null = getOptionInfoByDateAndStrike(optionsData, date, strikeBuy as number);
 
+			const MULTIPLIER = SHARES_PER_CONTRACT * CONTRACTS;
+
+			const dateForLabel = extractDateFromSymbol(date);
+			const dateLabel = `${dateForLabel.toLocaleDateString()} (${Math.floor((dateForLabel.getTime() - Date.now()) / (1000 * 60 * 60 * 24))} days) `
+			const primaSellRaw = sellInfo?.bid ? sellInfo.bid : null;
+			const primaSell = primaSellRaw ? Number((primaSellRaw * MULTIPLIER).toFixed(2)) : null;
+			const primaBuy = buyInfo?.ask ? Number((buyInfo.ask * MULTIPLIER).toFixed(2)) : null;
+			const profit = primaSell !== null && primaBuy !== null ? primaSell - primaBuy : null;
+			const maxLoss = strikeSell - strikeBuy - (profit?? 0);
+
+			const breakEven = primaSell !== null && profit !== null && Number((strikeSell - profit/MULTIPLIER).toFixed(3));
 			return {
-				date: extractDateFromSymbol(date).toLocaleDateString(),
-				primaSell: sellInfo?.bid ? Number((sellInfo.bid * SHARES_PER_CONTRACT * CONTRACTS).toFixed(2)) : null,
-				primaBuy: buyInfo?.ask ? Number((buyInfo.ask * SHARES_PER_CONTRACT * CONTRACTS).toFixed(2)) : null,
+				date: dateLabel,
+				primaSell,
+				primaBuy,
+				breakEven,
+				profit,
+				maxLoss
 			};
 		});
 
@@ -93,7 +107,7 @@ const SpreadAnalyzerApp = ({ side, stockId }: { side: 'PUT' | 'CALL'; stockId: n
 	return (
 		<div>
 			<h3>
-				{side == 'PUT' ? 'Bear Put' : 'Bull Call'} Spread Analyzer for {
+				{side == 'PUT' ? 'Bull Put' : 'Bear Call'} Spread Analyzer for {
 					post?.title?.rendered || 'Unknown'
 				} {`(${post?.id})` || ''}{' '}
 			</h3>
@@ -139,13 +153,7 @@ const SpreadAnalyzerApp = ({ side, stockId }: { side: 'PUT' | 'CALL'; stockId: n
 			<h4>Stock Options Data:</h4>
 			{optionsLoading && <p>Loading options data...</p>}
 			{optionsError && <p>Error fetching options: {optionsError instanceof Error ? optionsError.message : String(optionsError)}</p>}
-			{optionsData && (
-				<pre>
-					<code>{Object.keys(optionsData).length} dates</code>
-					<br />
-					<code>{spreadDates.join(', ')}</code>
-				</pre>
-			)}
+
 		</div>
 	);
 };

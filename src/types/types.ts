@@ -37,8 +37,12 @@ export type WPAllOptionsData = {
 	...
 }
 */
+
+// fields for a single X point
 export interface ChartDataType {
     date: string;
     primaSell: number | null;
     primaBuy: number | null;
+		breakEven: number | null;
+		profit: number | null;
 }
