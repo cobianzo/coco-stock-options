@@ -1,15 +1,18 @@
 import { useState, useEffect } from 'react';
 import apiFetch from '@wordpress/api-fetch';
 
+// types
+import { WPAllOptionsData } from 'src/types/types';
+
 const useGetStockOptions = (stockId: number, type?: 'put' | 'call') => {
-    const [options, setOptions] = useState(null);
+    const [optionsData, setOptionsData] = useState<WPAllOptionsData>({});
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
+    const [error, setError] = useState<Error | null>(null);
 
     useEffect(() => {
         if (!stockId) {
             setLoading(false);
-            setOptions(null);
+            setOptionsData({});
             return;
         }
 
@@ -21,7 +24,11 @@ const useGetStockOptions = (stockId: number, type?: 'put' | 'call') => {
 
         apiFetch({ path })
             .then((fetchedOptions) => {
-                setOptions(fetchedOptions);
+								if (fetchedOptions) {
+									setOptionsData(fetchedOptions as WPAllOptionsData);
+								} else {
+									setError(new Error('error fetching, unknown'));
+								}
                 setLoading(false);
             })
             .catch((fetchError) => {
@@ -30,7 +37,7 @@ const useGetStockOptions = (stockId: number, type?: 'put' | 'call') => {
             });
     }, [stockId, type]);
 
-    return { options, loading, error };
+    return { optionsData, loading, error };
 };
 
 export default useGetStockOptions;

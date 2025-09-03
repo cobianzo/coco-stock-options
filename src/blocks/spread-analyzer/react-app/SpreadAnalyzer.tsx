@@ -1,157 +1,127 @@
+// External
 import React from 'react';
-import { CartesianGrid, Legend, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
-import ValidNumberInput from './controls/ValidNumberInput';
-import { extractDateFromSymbol, extractFormalStrikePrice, sanitizeStrikePrice } from './helpers/sanitazors';
+
+// Internal
+import { extractDateFromSymbol } from './helpers/sanitazors';
+
+// Hooks and helpers
 import useGetStockOptions from './hooks/useGetStockOptions';
 import useGetStockPost from './hooks/useGetStockPost';
+import useValidStrikes from './hooks/useValidStrikes';
+import { getOptionInfoByDateAndStrike, getLatestUpdateFromFirstElement } from './helpers/helpers';
 
+// Types
+import { WPStockOptionInfo, WPAllOptionsData, ChartDataType } from 'src/types/types';
+import ChartDatesPrimas from './components/ChartDatesPrimas';
+import Controls from './components/controls/Controls';
+
+// Consts
 const SHARES_PER_CONTRACT = 100;
 const CONTRACTS = 1;
 
 const SpreadAnalyzerApp = ({ side, stockId }: { side: 'PUT' | 'CALL'; stockId: number }) => {
-	const { options, loading: optionsLoading, error: optionsError } = useGetStockOptions( stockId, side.toLowerCase() as 'put' | 'call');
+
+	// Custom hooks
+	// ==============================
+	const { optionsData, loading: optionsLoading, error: optionsError }: {
+			optionsData: WPAllOptionsData, loading: boolean, error: Error | null
+		} = useGetStockOptions( stockId, side.toLowerCase() as 'put' | 'call' );
+	const { validStrikes } = useValidStrikes(optionsData);
 	const { post, loading: postLoading, error: postError } = useGetStockPost(stockId);
 
-	const [spreadDates, setSpreadDates] = React.useState<string[]>([]);
-	// Estados para los comandos de edición
+	// Reactive vars of the component
+	// ==============================
+	const [spreadDates, setSpreadDates] = React.useState<string[]>([]); // all dates like [ "BXMT250919P", ...]
 	const [strikeSell, setStrikeSell] = React.useState<number>(0.0);
 	const [strikeBuy, setStrikeBuy] = React.useState<number>(0.0);
-	const [validStrikes, setValidStrikes] = React.useState<number[]>([]);
 
-	// Datos para el gráfico
-	const [chartData, setChartData] = React.useState<Array<{ date: string; primaSell: number; primaBuy: number }>>([]);
+	// Model of the chart: X => dates, Y => primas (for selling and for buying)
+	const [chartData, setChartData] = React.useState<Array<ChartDataType>>([]);
 
+
+	// Init things when loading
+	// ==============================
+
+	// INIT >>> values for initial inputs for strike sell and buy
 	React.useEffect(() => {
-		if (!options) return;
+		// set initial valua around the half of all the list of valid strikes
+    const defaultSellStrike = validStrikes[Math.floor(validStrikes.length / 2) + 1];
+    const defaultBuyStrike = validStrikes[Math.floor(validStrikes.length / 2) - 1];
+    setStrikeSell(defaultSellStrike);
+    setStrikeBuy(defaultBuyStrike);
+	}, [validStrikes]);
 
-		const dates = Object.keys(options); // .map( date6digits => extractDateFromSymbol(date6digits).toLocaleDateString() );
+
+	// INIT >>> All valid dates as [ "BXMT250919P", ...]
+	React.useEffect(() => {
+		if (!optionsData) return;
+		const dates = Object.keys(optionsData);
 		setSpreadDates(dates);
+	}, [optionsData]);
 
-		// Obtener strikes válidos
-		let strikes: number[] = [];
-		Object.keys(options).forEach((date6digits) => {
-			const strikesForTheDate = options[date6digits];
-			strikes = strikes.concat(Object.keys(strikesForTheDate).map((a) => sanitizeStrikePrice(a)));
-			strikes.sort((a, b) => a - b);
-			strikes = [...new Set(strikes)]; // Remove duplicates
-		});
-		setValidStrikes(strikes);
 
-		const defaultSellStrike = strikes[Math.floor(strikes.length / 2) + 1]; // 00011000
-		const defaultBuyStrike = strikes[Math.floor(strikes.length / 2) - 1];
-		setStrikeSell(defaultSellStrike);
-		setStrikeBuy(defaultBuyStrike);
-	}, [options]);
-
-	// Esto pinta la grafica
+	// INIT and update chart >>> Paints chart
 	React.useEffect(() => {
+		if (!optionsData || Object.keys(optionsData).length === 0 || spreadDates.length === 0) return;
+		if (!strikeSell || ! strikeBuy) return;
 		// Preparar datos para el gráfico
-		const data = spreadDates.map((date) => {
-			// get all bid values for the date
-			const strikesForDate = options[date]; // [ 00115000, 00135000, ...]
+		const chartData = spreadDates.map((date) => {
 
-			const formalPrice = extractFormalStrikePrice(strikeSell);
-			const infoForPutOrCall = strikesForDate[formalPrice];
+			const sellInfo: WPStockOptionInfo | null = getOptionInfoByDateAndStrike(optionsData, date, strikeSell as number);
+			const buyInfo: WPStockOptionInfo | null = getOptionInfoByDateAndStrike(optionsData, date, strikeBuy as number);
 
 			return {
 				date: extractDateFromSymbol(date).toLocaleDateString(),
-				primaSell: (infoForPutOrCall?.bid ?? 0) * SHARES_PER_CONTRACT * CONTRACTS,
-				primaBuy: (infoForPutOrCall?.ask ?? 0) * SHARES_PER_CONTRACT * CONTRACTS,
+				primaSell: (sellInfo?.bid ?? 0) * SHARES_PER_CONTRACT * CONTRACTS,
+				primaBuy: (buyInfo?.ask ?? 0) * SHARES_PER_CONTRACT * CONTRACTS,
 			};
 		});
-		setChartData(data);
-	}, [spreadDates, strikeSell, strikeBuy]);
 
+		setChartData(chartData);
+
+	}, [spreadDates, strikeSell, strikeBuy, optionsData]);
+
+
+
+
+	/**
+	 * ===========
+	 * JSX
+	 * ===========
+	 */
 	return (
 		<div>
 			<h3>
-				{side == 'PUT' ? 'Bear Put' : 'Bull Call'} Spread Analyzer for {post?.title?.rendered || 'Unknown'} {`(${post?.id})` || ''}{' '}
+				{side == 'PUT' ? 'Bear Put' : 'Bull Call'} Spread Analyzer for {
+					post?.title?.rendered || 'Unknown'
+				} {`(${post?.id})` || ''}{' '}
 			</h3>
+
 			{postLoading && <p>Loading post data...</p>}
 			{postError && <p>Error fetching post: {postError.message}</p>}
 
-			<h4>Valid Strikes:</h4>
-			<pre>
-				<code>{JSON.stringify(validStrikes, null, 2)}</code>
-			</pre>
-
 			{/* Panel de comandos de edición */}
-			<div className="editing-commands-panel">
-				<h4>Edit Spread</h4>
-				<div className="three-column-layout">
-					{/* Columna izquierda - vacía */}
-					<div className="column column-left"></div>
-
-					{/* Columna del medio - inputs */}
-					<div className="column column-center">
-						<div className="input-group">
-							<label htmlFor="strikeSell">Strike Sell ({strikeSell}):</label>
-							{strikeSell && (
-								<ValidNumberInput
-									defaultValue={strikeSell}
-									validValues={validStrikes}
-									onChange={(newVal: number) => setStrikeSell(newVal || 0)}
-								/>
-							)}
-						</div>
-						<div className="input-group">
-							<label htmlFor="strikeBuy">Strike Buy ({strikeBuy}):</label>
-							{strikeBuy && (
-								<ValidNumberInput
-									defaultValue={strikeBuy}
-									validValues={validStrikes}
-									onChange={(newVal: number) => setStrikeBuy(newVal || 0)}
-								/>
-							)}
-						</div>
-					</div>
-
-					{/* Columna derecha - vacía por ahora */}
-					<div className="column column-right"></div>
-				</div>
-			</div>
+			<Controls validStrikes={validStrikes}
+				strikeSell={strikeSell} setStrikeSell={setStrikeSell}
+				strikeBuy={strikeBuy} setStrikeBuy={setStrikeBuy}
+			/>
 
 			{/* Gráfico de prima del spread */}
 			{chartData.length > 0 && (
 				<div className="chart-container">
 					<h4>Prima Sell Over Time</h4>
-					<p>Latest update: {   options[Object.keys(options)[0]][Object.keys(options[Object.keys(options)[0]])[0]].cboe_timestamp   }</p>
+					<p>Latest update: {getLatestUpdateFromFirstElement(optionsData)}</p>
 
-					{/* TODO: show latest date of update for the options data */}
-					<ResponsiveContainer width="100%" height={400}>
-						<LineChart data={chartData}>
-							<CartesianGrid strokeDasharray="3 3" />
-							<XAxis dataKey="date" tick={{ fontSize: 12 }} angle={-45} textAnchor="end" height={80} />
-							<YAxis domain={[0, 500]} tick={{ fontSize: 12 }} />
-							<Tooltip formatter={(value, name) => [value, name]} labelFormatter={(label) => `Date: ${label}`} />
-							<Legend />
-							<Line
-								type="monotone"
-								dataKey="primaSell"
-								stroke="#3b82f6"
-								strokeWidth={2}
-								dot={{ fill: '#3b82f6', strokeWidth: 2, r: 4 }}
-								activeDot={{ r: 6 }}
-							/>
-							<Line
-								type="monotone"
-								dataKey="primaBuy"
-								stroke="#2f6008"
-								strokeWidth={2}
-								dot={{ fill: '#2f6008', strokeWidth: 2, r: 4 }}
-								activeDot={{ r: 6 }}
-							/>
-						</LineChart>
-					</ResponsiveContainer>
+					<ChartDatesPrimas chartData={chartData} />
 				</div>
 			)}
 
 			<h4>Stock Options Data:</h4>
 			{optionsLoading && <p>Loading options data...</p>}
-			{optionsError && <p>Error fetching options: {optionsError.message}</p>}
-			{options && (
+			{optionsError && <p>Error fetching options: {optionsError instanceof Error ? optionsError.message : String(optionsError)}</p>}
+			{optionsData && (
 				<pre>
-					<code>{Object.keys(options).length} dates</code>
+					<code>{Object.keys(optionsData).length} dates</code>
 					<br />
 					<code>{spreadDates.join(', ')}</code>
 				</pre>

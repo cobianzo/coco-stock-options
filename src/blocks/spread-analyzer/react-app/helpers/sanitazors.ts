@@ -21,7 +21,7 @@ export const extractDateFromSymbol = (symbol: string): Date => {
 
 /**
  * Converts strike price string to number with correct decimals
- * @param strikePrice Strike price string where last 3 digits are decimals (e.g. '002500')
+ * @param strikePrice Strike price string where last 3 digits are decimals (e.g. '00002500')
  * @returns Number with correct decimal places (e.g. 2.500)
  */
 export const sanitizeStrikePrice = (strikePrice: string): number => {
@@ -40,5 +40,5 @@ export const extractFormalStrikePrice = (strikePrice: number): string => {
     while (formal.length < 8) {
         formal = '0' + formal;
     }
-    return formal;
+    return formal as string;
 }
