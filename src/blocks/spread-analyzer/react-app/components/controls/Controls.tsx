@@ -62,12 +62,8 @@ function Controls({
 	 * ===========
 	 */
 	return (
-		<div className="editing-commands-panel">
-			<h4>Edit Spread</h4>
-			<div className="three-column-layout">
-				{/* Columna izquierda - vacía */}
-				<div className="column column-left"></div>
 
+			<div className="three-column-layout">
 				{/* Columna del medio - inputs */}
 				<div className="column column-center">
 					<div className="input-group">
@@ -110,7 +106,7 @@ function Controls({
 					</div>
 				</div>
 			</div>
-		</div>
+
 	);
 }
 

@@ -7,10 +7,10 @@
     /* Design tokens */
     --cso-bg: #ffffff;
     --cso-border: #e5e7eb; /* gray-200 */
-    --cso-text: #111827;   /* gray-900 */
-    --cso-muted: #6b7280;  /* gray-500 */
+    --cso-text: #111827; /* gray-900 */
+    --cso-muted: #6b7280; /* gray-500 */
     --cso-radius: 12px;
-    --cso-shadow: 0 1px 2px rgba(0,0,0,0.06), 0 6px 20px rgba(0,0,0,0.08);
+    --cso-shadow: 0 1px 2px rgba(0, 0, 0, 0.06), 0 6px 20px rgba(0, 0, 0, 0.08);
 
     background: var(--cso-bg);
     color: var(--cso-text);
@@ -20,11 +20,12 @@
     padding: 16px 20px;
     margin: 1.2rem 0;
     overflow: hidden;
+    font-size: 1rem;
 }
 
 .wp-block-coco-stock-options-spread-analyzer h3,
 .wp-block-coco-stock-options-spread-analyzer h4 {
-    margin: 0 0 .5rem 0;
+    margin: 0 0 0.5rem 0;
     line-height: 1.25;
 }
 
@@ -40,25 +41,39 @@
 }
 
 .wp-block-coco-stock-options-spread-analyzer p {
-    margin: .4rem 0;
+    margin: 0.4rem 0;
 }
 
 .wp-block-coco-stock-options-spread-analyzer pre {
     background: #f9fafb; /* gray-50 */
     border: 1px solid #eef2f7; /* light edge */
     border-radius: 8px;
-    padding: .75rem;
-    margin: .75rem 0 0 0;
+    padding: 0.75rem;
+    margin: 0.75rem 0 0 0;
     overflow: auto;
 }
 
 /* Editing commands panel */
 .wp-block-coco-stock-options-spread-analyzer .editing-commands-panel {
+    display: flex;
     margin: 1.5rem 0;
     padding: 1rem;
     background: #f8fafc;
     border: 1px solid #e2e8f0;
     border-radius: 8px;
+
+    .editing-commands-panel-left {
+      font-size: 1rem;;
+      flex-basis: 30%;
+      small {
+        color: gray;
+        display: block;;
+      }
+    }
+
+    p {
+      font-size: 1rem;;
+    }
 }
 
 .wp-block-coco-stock-options-spread-analyzer .editing-commands-panel h4 {
@@ -105,7 +120,9 @@
     font-size: 0.875rem;
     background: #ffffff;
     color: var(--cso-text);
-    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+    transition:
+        border-color 0.15s ease-in-out,
+        box-shadow 0.15s ease-in-out;
 }
 
 .wp-block-coco-stock-options-spread-analyzer .input-group input:focus {
@@ -127,12 +144,14 @@
     border-radius: 8px;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
-
-.wp-block-coco-stock-options-spread-analyzer .chart-container h4 {
-    margin: 0 0 1rem 0;
-    font-size: 1rem;
-    font-weight: 600;
-    color: var(--cso-text);
+.wp-block-coco-stock-options-spread-analyzer .chart-container-title {
+    display: flex;
+    gap: 1rem;
+    justify-content: space-around;
+}
+.reload-button {
+    height: 35px;
+    border-radius: 10px;
 }
 
 /* Simple responsive tweak */

@@ -36,7 +36,7 @@ const SpreadAnalyzerApp = ({ side, stockId }: { side: 'PUT' | 'CALL'; stockId: n
 	const [strikeSell, setStrikeSell] = React.useState<number>(0.0);
 	const [strikeBuy, setStrikeBuy] = React.useState<number>(0.0);
 
-	// Model of the chart: X => dates, Y => primas (for selling and for buying)
+	// Model of the chart: X => dates, Y => primas (for selling and for buying), this is set from optionsData
 	const [chartData, setChartData] = React.useState<Array<ChartDataType>>([]);
 
 
@@ -73,8 +73,8 @@ const SpreadAnalyzerApp = ({ side, stockId }: { side: 'PUT' | 'CALL'; stockId: n
 
 			return {
 				date: extractDateFromSymbol(date).toLocaleDateString(),
-				primaSell: (sellInfo?.bid ?? 0) * SHARES_PER_CONTRACT * CONTRACTS,
-				primaBuy: (buyInfo?.ask ?? 0) * SHARES_PER_CONTRACT * CONTRACTS,
+				primaSell: sellInfo?.bid ? Number((sellInfo.bid * SHARES_PER_CONTRACT * CONTRACTS).toFixed(2)) : null,
+				primaBuy: buyInfo?.ask ? Number((buyInfo.ask * SHARES_PER_CONTRACT * CONTRACTS).toFixed(2)) : null,
 			};
 		});
 
@@ -97,26 +97,41 @@ const SpreadAnalyzerApp = ({ side, stockId }: { side: 'PUT' | 'CALL'; stockId: n
 					post?.title?.rendered || 'Unknown'
 				} {`(${post?.id})` || ''}{' '}
 			</h3>
+			<p>Analyzing by strike prices</p>
 
 			{postLoading && <p>Loading post data...</p>}
 			{postError && <p>Error fetching post: {postError.message}</p>}
 
 			{/* Panel de comandos de edición */}
-			<Controls validStrikes={validStrikes || []}
-				strikeSell={strikeSell} setStrikeSell={setStrikeSell}
-				strikeBuy={strikeBuy} setStrikeBuy={setStrikeBuy}
-			/>
+			<div className="editing-commands-panel">
+				<div className="editing-commands-panel-left">
+					Contracts: { CONTRACTS } <br/>
+					Shares <small>({SHARES_PER_CONTRACT} per contract)</small> { CONTRACTS * SHARES_PER_CONTRACT }
+				</div>
+				<div>
+					<Controls validStrikes={validStrikes || []}
+						strikeSell={strikeSell} setStrikeSell={setStrikeSell}
+						strikeBuy={strikeBuy} setStrikeBuy={setStrikeBuy}
+						/>
+				</div>
+			</div>
 
 			{/* Gráfico de prima del spread */}
 			{chartData.length > 0 && (
 				<div className="chart-container">
-					<h4>Prima Sell Over Time</h4>
-					<ReloadData
-						stockPostTitle={post?.title?.rendered ?? null}
-						refetch={refetchOptionsData}
-					/>
-					<p>Latest update: {getLatestUpdateFromFirstElement(optionsData)} ({Math.floor((Date.now() - new Date(getLatestUpdateFromFirstElement(optionsData)).getTime()) / (1000 * 60 * 60 * 24))} days ago)</p>
-
+					<div className="chart-container-title">
+						<h4>Prima Sell Over Time</h4>
+						<ReloadData
+							stockPostTitle={post?.title?.rendered ?? null}
+							refetch={refetchOptionsData}
+						/>
+						<small>
+							Latest update: {getLatestUpdateFromFirstElement(optionsData)}
+							<br/>
+							({Math.floor((Date.now() - new Date(getLatestUpdateFromFirstElement(optionsData)).getTime()) / (1000 * 60 * 60 * 24))}
+							&nbsp; days ago)
+						</small>
+					</div>
 					<ChartDatesPrimas chartData={chartData} />
 				</div>
 			)}

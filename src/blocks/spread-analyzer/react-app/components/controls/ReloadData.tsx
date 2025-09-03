@@ -1,7 +1,7 @@
 import apiFetch from '@wordpress/api-fetch';
 import React, { useState } from 'react';
 
-function ReloadData({ stockPostTitle, refetch }: { stockPostTitle?: string; refetch: () => void }) {
+function ReloadData({ stockPostTitle, refetch }: { stockPostTitle: string | null; refetch: () => void }) {
 	const [error, setError] = useState<string | null>(null);
 	const [isLoading, setIsLoading] = useState(false);
 

@@ -39,6 +39,6 @@ export type WPAllOptionsData = {
 */
 export interface ChartDataType {
     date: string;
-    primaSell: number;
-    primaBuy: number;
+    primaSell: number | null;
+    primaBuy: number | null;
 }
