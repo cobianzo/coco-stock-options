@@ -19,7 +19,10 @@ function ChartDatesPrimas({ chartData }: { chartData: Array<ChartDataType> }) {
 					<CartesianGrid strokeDasharray="3 3" />
 					<XAxis dataKey="date" tick={{ fontSize: 12 }} angle={-45} textAnchor="end" height={80} />
 					<YAxis domain={[0, maxValue]} tick={{ fontSize: 12 }} />
-					<Tooltip formatter={(value, name) => [value, name]} labelFormatter={(label) => `Date: ${label}`} />
+					<Tooltip
+							formatter={(value, name) => [value, name]}
+							labelFormatter={(label) => `Date: ${label}`}
+						/>
 					<Legend />
 					<Bar dataKey="profit" fill="#8884d8" barSize={20} />
 					<Bar dataKey="maxLoss" fill="#ef4444" barSize={20} />

@@ -3,7 +3,7 @@ import { Entity } from '@wordpress/core-data';
 // Definir una interfaz que extienda Entity
 export interface WPStock extends Entity {
   id: number;
-  title: { rendered: string };
+  title: { rendered: string, raw: string };
   content: { rendered: string };
   slug: string;
   date: string;

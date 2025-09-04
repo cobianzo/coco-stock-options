@@ -1,3 +1,4 @@
+import { loadStrike } from './localStorageManager';
 import { extractFormalStrikePrice } from './sanitazors';
 
 import { WPStockOptionInfo, WPAllOptionsData } from 'src/types/types';
@@ -47,4 +48,21 @@ export function isValidValue( validValues: number[], value: number, fallback = t
 			return '0.000'
 	}
 	return false;
+}
+
+export function getInitialValueParam( paramName: string, localStorageParamPrefix = '' ): string | null {
+
+	const urlParams = new URLSearchParams(window.location.search);
+	const paramValue = urlParams.get(paramName);
+
+	if (paramValue) {
+			return paramValue;
+	}
+
+	const locaStorageValue = loadStrike(localStorageParamPrefix, paramName as 'strikeBuy' | 'strikeSell');
+
+	if ( locaStorageValue ) {
+		return locaStorageValue.toString();
+	}
+	return null;
 }

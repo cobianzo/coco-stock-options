@@ -572,8 +572,8 @@ class AdminPage {
 		$last_sync = null;
 
 		foreach ( $keys as $meta_key ) {
-			$options_data = $this->stock_meta->get_stock_options( $post_id, $meta_key );
-			$first_strike_option = empty( $options_data ) ? null :  array_pop( $options_data );
+			$options_data        = $this->stock_meta->get_stock_options( $post_id, $meta_key );
+			$first_strike_option = empty( $options_data ) ? null : array_pop( $options_data );
 			if ( $first_strike_option && isset( $first_strike_option['last_update'] ) ) {
 				if ( null === $last_sync || $first_strike_option['last_update'] > $last_sync ) {
 					$last_sync = $first_strike_option['last_update'];

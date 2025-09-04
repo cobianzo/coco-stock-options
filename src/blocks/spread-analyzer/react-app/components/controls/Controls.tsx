@@ -1,14 +1,18 @@
 import React, { useState } from 'react';
 
 import ValidNumberInput from './ValidNumberInput';
+import { saveStrike } from '../../helpers/localStorageManager';
+import UrlGenerator from '../UrlGenerator';
 
 function Controls({
+	ticker,
 	validStrikes,
 	strikeSell,
 	setStrikeSell,
 	strikeBuy,
 	setStrikeBuy,
 }: {
+	ticker: string;
 	validStrikes: Array<number>;
 	strikeSell: number;
 	setStrikeSell: (newVal: number) => void;
@@ -27,10 +31,15 @@ function Controls({
 	// ======================
 	const handleStrikeSellBuyChange = (newVal: number, updated: 'sell' | 'buy') => {
 		const value = newVal || 0;
+		let sellValueForLocalStorage;
+		let buyValueForLocalStorage;
+
 		if (updated === 'sell') {
 			setStrikeSell(value);
+			sellValueForLocalStorage = value;
 		} else {
 			setStrikeBuy(value);
+			buyValueForLocalStorage = value;
 		}
 
 		// update automatically value of the other leg of the spread, based on the ticksGap selected.
@@ -40,12 +49,16 @@ function Controls({
 			if (validStrikes.includes(diff)) {
 				if (updated === 'sell') {
 					setStrikeBuy(diff);
+					sellValueForLocalStorage = diff;
 				} else {
 					setStrikeSell(diff);
+					buyValueForLocalStorage = diff;
 				}
 			}
-		} else {
 		}
+
+		if (sellValueForLocalStorage) saveStrike(ticker, 'strikeSell', sellValueForLocalStorage);
+		if (buyValueForLocalStorage) saveStrike(ticker, 'strikeBuy', buyValueForLocalStorage);
 	};
 
 	/**
@@ -82,7 +95,7 @@ function Controls({
 					</div>
 				</div>
 
-				{/* Right column - Ticks Gap control */}
+				{/* 3rd column - Ticks Gap control */}
 				<div className="column column-right">
 					<label htmlFor="ticks-gap">Prices Gap:</label>
 					<div className="input-group input-group-ticks-gap">
@@ -99,6 +112,9 @@ function Controls({
 							disabled
 						/>
 					</div>
+				</div>
+				<div className="column column-4th">
+					<UrlGenerator ticker={ticker} strikeSell={strikeSell} strikeBuy={strikeBuy} />
 				</div>
 			</div>
 

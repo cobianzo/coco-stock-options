@@ -8,13 +8,17 @@ import { extractDateFromSymbol } from './helpers/sanitazors';
 import useGetStockOptions from './hooks/useGetStockOptions';
 import useGetStockPost from './hooks/useGetStockPost';
 import useValidStrikes from './hooks/useValidStrikes';
-import { getOptionInfoByDateAndStrike, getLatestUpdateFromFirstElement } from './helpers/helpers';
+import { getOptionInfoByDateAndStrike, getLatestUpdateFromFirstElement, getInitialValueParam } from './helpers/helpers';
+import { loadStrike } from './helpers/localStorageManager';
+
+// Components
+import Controls from './components/controls/Controls';
+import ReloadData from './components/controls/ReloadData';
 
 // Types
 import { WPStockOptionInfo, WPAllOptionsData, ChartDataType } from 'src/types/types';
 import ChartDatesPrimas from './components/ChartDatesPrimas';
-import Controls from './components/controls/Controls';
-import ReloadData from './components/controls/ReloadData';
+
 
 // Consts
 const SHARES_PER_CONTRACT = 100;
@@ -45,12 +49,19 @@ const SpreadAnalyzerApp = ({ side, stockId }: { side: 'PUT' | 'CALL'; stockId: n
 
 	// INIT >>> values for initial inputs for strike sell and buy
 	React.useEffect(() => {
+		if (!post?.title) return;
+		if (!validStrikes || validStrikes.length === 0) return;
+
 		// set initial valua around the half of all the list of valid strikes
-    const defaultSellStrike = validStrikes[Math.floor(validStrikes.length / 2) + 1];
-    const defaultBuyStrike = validStrikes[Math.floor(validStrikes.length / 2) - 1];
-    setStrikeSell(defaultSellStrike);
-    setStrikeBuy(defaultBuyStrike);
-	}, [validStrikes]);
+		const initialSellStrike = getInitialValueParam('strikeSell', post.title?.rendered?? '');
+		let defaultSellStrike = validStrikes[Math.floor(validStrikes.length / 2) + 1];
+
+		const initialBuyStrike = getInitialValueParam('strikeBuy', post.title?.rendered?? '');
+		let defaultBuyStrike = validStrikes[Math.floor(validStrikes.length / 2) - 1];
+
+    setStrikeSell(initialSellStrike? parseFloat(initialSellStrike) : defaultSellStrike);
+    setStrikeBuy(initialBuyStrike? parseFloat(initialBuyStrike) : defaultBuyStrike);
+	}, [validStrikes, post]);
 
 
 	// INIT >>> All valid dates as [ "BXMT250919P", ...]
@@ -79,7 +90,7 @@ const SpreadAnalyzerApp = ({ side, stockId }: { side: 'PUT' | 'CALL'; stockId: n
 			const primaSell = primaSellRaw ? Number((primaSellRaw * MULTIPLIER).toFixed(2)) : null;
 			const primaBuy = buyInfo?.ask ? Number((buyInfo.ask * MULTIPLIER).toFixed(2)) : null;
 			const profit = primaSell !== null && primaBuy !== null ? primaSell - primaBuy : null;
-			const maxLoss = -1 * (strikeSell - strikeBuy - (profit?? 0));
+			const maxLoss = -1 * ((strikeSell - strikeBuy) * MULTIPLIER - (profit?? 0));
 
 			const breakEven = primaSell !== null && profit !== null && Number((strikeSell - profit/MULTIPLIER).toFixed(3));
 			return {
@@ -123,10 +134,13 @@ const SpreadAnalyzerApp = ({ side, stockId }: { side: 'PUT' | 'CALL'; stockId: n
 					Shares <small>({SHARES_PER_CONTRACT} per contract)</small> { CONTRACTS * SHARES_PER_CONTRACT }
 				</div>
 				<div>
-					<Controls validStrikes={validStrikes || []}
+
+					<Controls ticker={post?.title?.rendered ?? ''}
+						validStrikes={validStrikes || []}
 						strikeSell={strikeSell} setStrikeSell={setStrikeSell}
 						strikeBuy={strikeBuy} setStrikeBuy={setStrikeBuy}
 						/>
+
 				</div>
 			</div>
 

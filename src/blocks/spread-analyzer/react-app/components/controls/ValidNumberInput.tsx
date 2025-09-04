@@ -101,7 +101,6 @@ const ValidNumberInput = ({ validValues, defaultValue, setDefaultValue, onChange
 	};
 
 	const handleSuggestionClick = (value: string | number) => {
-		debugger
 		const valueNumber = typeof value === 'string' ? parseFloat(value) : value;
 
 		updateValue(valueNumber);
@@ -146,7 +145,6 @@ const ValidNumberInput = ({ validValues, defaultValue, setDefaultValue, onChange
 			<ul style={styles.suggestions} className="valid-number-input-suggestions">
 				{getSuggestedValues().map((value) => (
 					<li key={value} style={styles.suggestion} onClick={() =>{
-						debugger
 						handleSuggestionClick(value); }}>
 						{value.toFixed(3)}
 					</li>

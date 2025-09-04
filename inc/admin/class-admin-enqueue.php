@@ -20,11 +20,14 @@ class AdminEnqueue {
 		// Admin scripts and styles
 		add_action( 'admin_enqueue_scripts', [ __CLASS__, 'enqueue_admin_scripts' ] );
 		add_action( 'admin_enqueue_scripts', [ __CLASS__, 'enqueue_admin_styles' ] );
+
+		// Frontend scripts and styles
+		add_action( 'wp_enqueue_scripts', [ __CLASS__, 'enqueue_frontend_styles' ] );
 	}
 
-		/**
-		 * Enqueue admin scripts
-		 */
+	/**
+	 * Enqueue admin scripts
+	 */
 	public static function enqueue_admin_scripts(): void {
 		$screen = get_current_screen();
 
@@ -51,9 +54,9 @@ class AdminEnqueue {
 		}
 	}
 
-			/**
-			 * Enqueue admin styles
-			 */
+	/**
+	 * Enqueue admin styles
+	 */
 	public static function enqueue_admin_styles(): void {
 		$screen = get_current_screen();
 
@@ -66,6 +69,13 @@ class AdminEnqueue {
 				COCO_STOCK_OPTIONS_VERSION
 			);
 		}
+	}
+
+	/**
+	 * Enqueue frontend styles
+	 */
+	public static function enqueue_frontend_styles(): void {
+		wp_enqueue_style( 'dashicons' );
 	}
 }
 
