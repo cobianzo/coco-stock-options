@@ -1,68 +1,63 @@
-import React, { useState } from 'react'
+import React, { useState } from 'react';
 
-function UrlGenerator({
-  ticker,
-  strikeSell,
-  strikeBuy,
-}: {
-  ticker: string;
-  strikeSell: string;
-  strikeBuy: string;
-}) {
-  const [generatedUrl, setGeneratedUrl] = useState('')
+/**
+ * COMPONENT
+ */
+function UrlGenerator({ strikeSell, strikeBuy }: { strikeSell: number; strikeBuy: number }) {
+	// Internal state vars
+	const [generatedUrl, setGeneratedUrl] = useState('');
 
-  const generateUrl = () => {
-    // Get current URL and create URL object
-    const currentUrl = new URL(window.location.href)
+	// The function helper
+	// ===================
+	const generateUrl = () => {
+		// Get current URL and create URL object
+		const currentUrl = new URL(window.location.href);
 
-    // Remove existing strike parameters if they exist
-    currentUrl.searchParams.delete('strikeSell')
-    currentUrl.searchParams.delete('strikeBuy')
+		// Remove existing strike parameters if they exist
+		currentUrl.searchParams.delete('strikesell');
+		currentUrl.searchParams.delete('strikebuy');
 
-    // Add new strike parameters
-    if (strikeSell) currentUrl.searchParams.set('strikeSell', strikeSell)
-    if (strikeBuy) currentUrl.searchParams.set('strikeBuy', strikeBuy)
+		// Add new strike parameters
+		if (strikeSell) currentUrl.searchParams.set('strikesell', String(strikeSell));
+		if (strikeBuy) currentUrl.searchParams.set('strikebuy', String(strikeBuy));
 
-    setGeneratedUrl(currentUrl.toString())
-  }
+		setGeneratedUrl(currentUrl.toString());
+	};
 
-  const copyToClipboard = () => {
-    navigator.clipboard.writeText(generatedUrl)
-      .then(() => {
-        alert('URL copied to clipboard!')
-      })
-      .catch(err => {
-        console.error('Failed to copy URL:', err)
-      })
-  }
+	// Copy to Clipboard fn
+	// =======================
+	const copyToClipboard = () => {
+		navigator.clipboard
+			.writeText(generatedUrl)
+			.then(() => {
+				alert('URL copied to clipboard!');
+			})
+			.catch((err) => {
+				console.error('Failed to copy URL:', err);
+			});
+	};
 
-  return (
-    <div className="url-generator">
-      <button
-        onClick={generateUrl}
-        className="generate-button"
-      >
-        Create link
-      </button>
+	/**
+	 * ===========
+	 * JSX
+	 * ===========
+	 */
+	return (
+		<div className="url-generator">
+			<button onClick={generateUrl} className="generate-button">
+				Create link
+			</button>
 
-      {generatedUrl && (
-        <div className="url-display">
-          <input
-            type="text"
-            readOnly
-            value={generatedUrl}
-            className="url-input"
-          />
-          <button
-            onClick={copyToClipboard}
-            className="copy-button"
-          >
-            Copy
-          </button>
-        </div>
-      )}
-    </div>
-  )
+			{generatedUrl && (
+				<div className="url-display">
+					<input type="text" readOnly value={generatedUrl} className="url-input" />
+					<button onClick={copyToClipboard} className="copy-button">
+						Copy
+					</button>
+				</div>
+			)}
+		</div>
+	);
 }
 
-export default UrlGenerator
+export default UrlGenerator;

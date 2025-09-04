@@ -4,30 +4,42 @@ import { isValidValue } from '../../helpers/helpers';
 
 interface ValidNumberInputProps {
 	validValues: number[];
-	defaultValue: number;
-	setDefaultValue: CallableFunction;
-	onChange?: (value: number) => void;
+	realValue: number;
+	onChange: (value: number) => void;
 }
 
-const ValidNumberInput = ({ validValues, defaultValue, setDefaultValue, onChange }: ValidNumberInputProps) => {
+/**
+ * Lookup component, to select a strike and limit the selectable value to the list of valid strikes
+ * This component is a little complex and probalby couldbe improved or simplified. It's nothing but a lookup.
+ *
+ * The variable that this input modifies is passed with 'realValue',
+ * and the way to update it it calling onChange.
+ *
+ * The internal var inputValue is the value of the input. It matches with realValue, but while editing
+ * they can be temprarily different.
+ *
+ */
 
-	const [inputValue, setInputValue] = useState<string>(defaultValue?.toFixed(3) || (validValues.length > 0 ? validValues[0]?.toFixed(3) : '0.000'));
+
+
+const ValidNumberInput = ({ validValues, realValue, onChange }: ValidNumberInputProps) => {
+
+	const [inputValue, setInputValue] = useState<string>(realValue?.toFixed(3) || (validValues.length > 0 ? validValues[0]?.toFixed(3) : '0.000'));
 	const [showSuggestions, setShowSuggestions] = useState(false);
 	const inputRef = useRef<HTMLDivElement>(null);
 
 	useEffect(() => {
-		const validValue = isValidValue(validValues, defaultValue, true );
+		const validValue = isValidValue(validValues, realValue, true );
 		if (typeof validValue === 'string' && validValue) {
 			setInputValue(validValue);
 		}
-	}, [defaultValue]);
+	}, [realValue]);
 
 	const updateValue = (newValue: string | number) => {
 		const valueToValidate = typeof newValue === 'string' ? parseFloat(newValue) : newValue;
 		const validValue: string | boolean = isValidValue(validValues, valueToValidate, true );
 		let validValueNumber = typeof validValue === 'string' ? parseFloat(validValue) : validValue;
 		if (typeof validValueNumber === 'number') {
-			setDefaultValue(validValueNumber);
 			if ( onChange ) {
 				onChange(validValueNumber as number);
 			}

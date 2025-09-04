@@ -1,63 +1,80 @@
 /**
- * Manages storing and retrieving data from localStorage.
+ * LocalStorage Manager - CRUD operations for managing data in localStorage
  */
 
-const STRIKE_BUY_KEY = 'strikeBuy';
-const STRIKE_SELL_KEY = 'strikeSell';
+export class LocalStorageManager {
+  /**
+   * Save data to localStorage
+   * @param key - Storage key
+   * @param value - Data to store
+   */
+  static save<T>(key: string, value: T): void {
+    try {
+      const serializedValue = JSON.stringify(value);
+      localStorage.setItem(key, serializedValue);
+    } catch (error) {
+      console.error('Error saving to localStorage:', error);
+    }
+  }
 
-/**
- * Creates a standardized key for localStorage.
- * @param ticker - The stock ticker.
- * @param key - The specific key to use.
- * @returns A string in the format 'ticker_key'.
- */
-const getKey = (ticker: string, key: string): string => `${ticker}_${key}`;
+  /**
+   * Retrieve data from localStorage
+   * @param key - Storage key
+   * @returns Stored data or null if not found
+   */
+  static load<T>(key: string): T | null {
+    try {
+      const item = localStorage.getItem(key);
+      return item ? JSON.parse(item) : null;
+    } catch (error) {
+      console.error('Error loading from localStorage:', error);
+      return null;
+    }
+  }
 
-/**
- * Saves a strike value to localStorage.
- *
- * @param ticker The stock ticker symbol.
- * @param strikeType The type of strike ('strikeBuy' or 'strikeSell').
- * @param value The value to save.
- */
-export const saveStrike = (
-	ticker: string,
-	strikeType: 'strikeBuy' | 'strikeSell',
-	value: number | string
-): void => {
+  /**
+   * Update existing data in localStorage
+   * @param key - Storage key
+   * @param updateFn - Update function that receives current value and returns new value
+   */
+  static update<T>(key: string, updateFn: (currentValue: T | null) => T): void {
+    try {
+      const currentValue = this.load<T>(key);
+      const newValue = updateFn(currentValue);
+      this.save(key, newValue);
+    } catch (error) {
+      console.error('Error updating localStorage:', error);
+    }
+  }
 
-	if (!ticker) return;
-	try {
-		const key = getKey(
-			ticker,
-			strikeType === 'strikeBuy' ? STRIKE_BUY_KEY : STRIKE_SELL_KEY
-		);
-		localStorage.setItem(key, String(value));
-	} catch (error) {
-		console.error('Error saving to localStorage:', error);
-	}
-};
+  /**
+   * Delete data from localStorage
+   * @param key - Storage key
+   */
+  static delete(key: string): void {
+    try {
+      localStorage.removeItem(key);
+    } catch (error) {
+      console.error('Error deleting from localStorage:', error);
+    }
+  }
 
-/**
- * Loads a strike value from localStorage.
- *
- * @param ticker The stock ticker symbol.
- * @param strikeType The type of strike ('strikeBuy' or 'strikeSell').
- * @returns The loaded value as a string, or null if not found or an error occurs.
- */
-export const loadStrike = (
-	ticker: string,
-	strikeType: 'strikeBuy' | 'strikeSell'
-): number | null => {
-	if (!ticker) return null;
-	try {
-		const key = getKey(
-			ticker,
-			strikeType === 'strikeBuy' ? STRIKE_BUY_KEY : STRIKE_SELL_KEY
-		);
-		return parseFloat( localStorage.getItem(key) || '0' );
-	} catch (error) {
-		console.error('Error loading from localStorage:', error);
-		return null;
-	}
-};
+  /**
+   * Check if key exists in localStorage
+   * @param key - Storage key
+   */
+  static exists(key: string): boolean {
+    return localStorage.getItem(key) !== null;
+  }
+
+  /**
+   * Clear all data from localStorage
+   */
+  static clear(): void {
+    try {
+      localStorage.clear();
+    } catch (error) {
+      console.error('Error clearing localStorage:', error);
+    }
+  }
+}

@@ -1,4 +1,4 @@
-import { loadStrike } from './localStorageManager';
+import { LocalStorageManager } from './localStorageManager';
 import { extractFormalStrikePrice } from './sanitazors';
 
 import { WPStockOptionInfo, WPAllOptionsData } from 'src/types/types';
@@ -50,7 +50,7 @@ export function isValidValue( validValues: number[], value: number, fallback = t
 	return false;
 }
 
-export function getInitialValueParam( paramName: string, localStorageParamPrefix = '' ): string | null {
+export function getInitialValueParam( paramName: string, localStorageParamPrefix: string | null = null ): string | null {
 
 	const urlParams = new URLSearchParams(window.location.search);
 	const paramValue = urlParams.get(paramName);
@@ -59,10 +59,29 @@ export function getInitialValueParam( paramName: string, localStorageParamPrefix
 			return paramValue;
 	}
 
-	const locaStorageValue = loadStrike(localStorageParamPrefix, paramName as 'strikeBuy' | 'strikeSell');
+	const locaStorageValue = LocalStorageManager.load( `${localStorageParamPrefix ? localStorageParamPrefix+'_' : ''}${paramName}`);
 
 	if ( locaStorageValue ) {
 		return locaStorageValue.toString();
 	}
 	return null;
+}
+
+/**
+ * Validates if a string represents a valid date
+ *
+ * @param {string} dateString - The string to validate as a date
+ * @returns {boolean} True if the string is a valid date, false otherwise
+ *
+ * @example
+ * isValidDate('2024-03-15') // returns true
+ * isValidDate('invalid-date') // returns false
+ */
+export function isValidDate(dateString: string): boolean {
+    // First check if the string creates a valid Date object
+		if (dateString.trim() === '') return false;
+    const date = new Date(dateString);
+    if (date.toString() === 'Invalid Date') return false;
+
+		return true;
 }

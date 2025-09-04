@@ -40,9 +40,15 @@ export type WPAllOptionsData = {
 
 // fields for a single X point
 export interface ChartDataType {
-    date: string;
+    formalDate: Date;
+    dateLabel: string;
     primaSell: number | null;
     primaBuy: number | null;
-		breakEven: number | null;
+		breakEven: number | false;
 		profit: number | null;
+		maxLoss: number;
+}
+
+export interface FiltersType {
+	maxDate: string | null;
 }

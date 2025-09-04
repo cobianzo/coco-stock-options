@@ -9,15 +9,15 @@ import useGetStockOptions from './hooks/useGetStockOptions';
 import useGetStockPost from './hooks/useGetStockPost';
 import useValidStrikes from './hooks/useValidStrikes';
 import { getOptionInfoByDateAndStrike, getLatestUpdateFromFirstElement, getInitialValueParam } from './helpers/helpers';
-import { loadStrike } from './helpers/localStorageManager';
+import { LocalStorageManager } from './helpers/localStorageManager';
 
 // Components
 import Controls from './components/controls/Controls';
 import ReloadData from './components/controls/ReloadData';
+import ChartDatesPrimas from './components/ChartDatesPrimas';
 
 // Types
-import { WPStockOptionInfo, WPAllOptionsData, ChartDataType } from 'src/types/types';
-import ChartDatesPrimas from './components/ChartDatesPrimas';
+import { WPStockOptionInfo, WPAllOptionsData, ChartDataType, FiltersType } from 'src/types/types';
 
 
 // Consts
@@ -39,6 +39,7 @@ const SpreadAnalyzerApp = ({ side, stockId }: { side: 'PUT' | 'CALL'; stockId: n
 	const [spreadDates, setSpreadDates] = React.useState<string[]>([]); // all dates like [ "BXMT250919P", ...]
 	const [strikeSell, setStrikeSell] = React.useState<number>(0.0);
 	const [strikeBuy, setStrikeBuy] = React.useState<number>(0.0);
+	const [filters, setFilters] = React.useState<FiltersType>({ maxDate: null});
 
 	// Model of the chart: X => dates, Y => primas (for selling and for buying), this is set from optionsData
 	const [chartData, setChartData] = React.useState<Array<ChartDataType>>([]);
@@ -53,10 +54,10 @@ const SpreadAnalyzerApp = ({ side, stockId }: { side: 'PUT' | 'CALL'; stockId: n
 		if (!validStrikes || validStrikes.length === 0) return;
 
 		// set initial valua around the half of all the list of valid strikes
-		const initialSellStrike = getInitialValueParam('strikeSell', post.title?.rendered?? '');
+		const initialSellStrike = getInitialValueParam('strikesell', post.title?.rendered?? '');
 		let defaultSellStrike = validStrikes[Math.floor(validStrikes.length / 2) + 1];
 
-		const initialBuyStrike = getInitialValueParam('strikeBuy', post.title?.rendered?? '');
+		const initialBuyStrike = getInitialValueParam('strikebuy', post.title?.rendered?? '');
 		let defaultBuyStrike = validStrikes[Math.floor(validStrikes.length / 2) - 1];
 
     setStrikeSell(initialSellStrike? parseFloat(initialSellStrike) : defaultSellStrike);
@@ -84,8 +85,8 @@ const SpreadAnalyzerApp = ({ side, stockId }: { side: 'PUT' | 'CALL'; stockId: n
 
 			const MULTIPLIER = SHARES_PER_CONTRACT * CONTRACTS;
 
-			const dateForLabel = extractDateFromSymbol(date);
-			const dateLabel = `${dateForLabel.toLocaleDateString()} (${Math.floor((dateForLabel.getTime() - Date.now()) / (1000 * 60 * 60 * 24))} days) `
+			const formalDate = extractDateFromSymbol(date);
+			const dateLabel = `${formalDate.toLocaleDateString()} (${Math.floor((formalDate.getTime() - Date.now()) / (1000 * 60 * 60 * 24))} days) `
 			const primaSellRaw = sellInfo?.bid ? sellInfo.bid : null;
 			const primaSell = primaSellRaw ? Number((primaSellRaw * MULTIPLIER).toFixed(2)) : null;
 			const primaBuy = buyInfo?.ask ? Number((buyInfo.ask * MULTIPLIER).toFixed(2)) : null;
@@ -94,7 +95,8 @@ const SpreadAnalyzerApp = ({ side, stockId }: { side: 'PUT' | 'CALL'; stockId: n
 
 			const breakEven = primaSell !== null && profit !== null && Number((strikeSell - profit/MULTIPLIER).toFixed(3));
 			return {
-				date: dateLabel,
+				formalDate,
+				dateLabel,
 				primaSell,
 				primaBuy,
 				breakEven,
@@ -139,6 +141,7 @@ const SpreadAnalyzerApp = ({ side, stockId }: { side: 'PUT' | 'CALL'; stockId: n
 						validStrikes={validStrikes || []}
 						strikeSell={strikeSell} setStrikeSell={setStrikeSell}
 						strikeBuy={strikeBuy} setStrikeBuy={setStrikeBuy}
+						filters={filters} setFilters={setFilters}
 						/>
 
 				</div>
@@ -160,7 +163,7 @@ const SpreadAnalyzerApp = ({ side, stockId }: { side: 'PUT' | 'CALL'; stockId: n
 							&nbsp; days ago)
 						</small>
 					</div>
-					<ChartDatesPrimas chartData={chartData} />
+					<ChartDatesPrimas chartData={chartData} setChartData={setChartData} filters={filters} />
 				</div>
 			)}
 
