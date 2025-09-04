@@ -2,7 +2,10 @@
   Generic styles of this plugin for all the frontend
   (not associated to any block in particular).
   Compiles into build/style-index.css
+
+  not sure if it's enqueud.
 */
-body {
+
+/* body {
   border: 5px solid red;
-}
+} */

@@ -13,6 +13,10 @@ TODO
 ===
 
 Translations
+
+Admin
+===
+Cron jobs
 Hacer el frontend mostrando la informacion tabulada de cada call y put de un ticker en la pagina single. Tambien mostrar botones para los endppints.
 Arreglar bug que dice ultima actualizacion Never.
 Ver por que no funciona en cobianzo.com
@@ -21,6 +25,10 @@ Anadir phpstan
 Anadir phpunit tests
 Cache all the cacheable things.
 Las fechas de los cron jobs no cuadra. El main cron job esta siempre programado para AHORA
+
+React app:
+===
+Popup funciona pero no tiene utilidad.
 
 
 HOW IT WORKS

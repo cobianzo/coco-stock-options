@@ -191,3 +191,37 @@
         padding: 0.75rem;
     }
 }
+
+
+/* Popup.css */
+.popup-content {
+    background: white;
+    position: absolute;
+    padding: 20px;
+    border-radius: 5px;
+    min-width: 300px;
+    max-width: 80%;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+.popup-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+    margin-bottom: 10px;
+}
+
+.popup-title {
+    margin: 0;
+    font-size: 1.2em;
+}
+
+.popup-close-btn {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    line-height: 1;
+}

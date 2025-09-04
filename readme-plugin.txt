@@ -3,23 +3,17 @@ Contributors: @cobianzo
 Tags: frets, container transitions, visual effects, decorative patterns, seamless transitions
 Requires at least: 6.0
 Tested up to: 6.8
-Stable tag: 1.0.2
+Stable tag: 1.0.4
 Requires PHP: 8.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-Enhance your WordPress Group blocks with decorative fret patterns that create seamless visual transitions between containers.
+Scanner of options, providing an endpoint and an app to track and analyze Bull Spread PUTs
 
 == Description ==
 
-Visual Transition is a WordPress plugin that extends the core Group block functionality by adding decorative fret patterns. These patterns act as visual connectors between Group blocks, creating an elegant "melting" effect where containers seamlessly blend into each other through custom clipping masks.
+This plugin defines Custom Post Types (CPT) for tracking required stocks. It scans for future options values for each stock from the CBOE API (`https://cdn.cboe.com/api/global/delayed_quotes/options/<stock-symbol>.json`) via a cron job. The results are formatted and saved as post meta, then exposed through a custom REST API endpoint.
 
-Key Features:
-* Adds new controls to the core Group block
-* Multiple pattern options for fret designs
-* Customizable visual transitions between containers
-* Seamless container clipping effects
-* Easy to use within the block editor
 
 == Installation ==
 

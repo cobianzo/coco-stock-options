@@ -91,9 +91,9 @@ const SpreadAnalyzerApp = ({ side, stockId }: { side: 'PUT' | 'CALL'; stockId: n
 			const primaSell = primaSellRaw ? Number((primaSellRaw * MULTIPLIER).toFixed(2)) : null;
 			const primaBuy = buyInfo?.ask ? Number((buyInfo.ask * MULTIPLIER).toFixed(2)) : null;
 			const profit = primaSell !== null && primaBuy !== null ? primaSell - primaBuy : null;
-			const maxLoss = -1 * ((strikeSell - strikeBuy) * MULTIPLIER - (profit?? 0));
+			const maxLoss = (profit !== null) ?  -1 * ((strikeSell - strikeBuy) * MULTIPLIER - (profit?? 0)) : null;
 
-			const breakEven = primaSell !== null && profit !== null && Number((strikeSell - profit/MULTIPLIER).toFixed(3));
+			const breakEven = (primaSell !== null && profit !== null) ? Number((strikeSell - profit/MULTIPLIER).toFixed(3)) : null;
 			return {
 				formalDate,
 				dateLabel,

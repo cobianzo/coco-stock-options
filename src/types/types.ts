@@ -44,9 +44,9 @@ export interface ChartDataType {
     dateLabel: string;
     primaSell: number | null;
     primaBuy: number | null;
-		breakEven: number | false;
+		breakEven: number | null;
 		profit: number | null;
-		maxLoss: number;
+		maxLoss: number | null;
 }
 
 export interface FiltersType {
